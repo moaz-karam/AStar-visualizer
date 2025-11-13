@@ -1,5 +1,5 @@
-#ifndef ARRAY_LIST
-#define ARRAY_LIST
+#ifndef ARRAY_LIST_H
+#define ARRAY_LIST_H
 
 template <typename T>
 class ArrayList
@@ -61,7 +61,7 @@ public:
     }
 
 
-    T pop()
+    T& pop()
     {
         if (isEmpty())
         {
@@ -77,7 +77,7 @@ public:
 
 
     void set(int i, T item) {items[i] = item;}
-    T get(int i) const {return items[i];}
+    T& get(int i) const {return items[i];}
     int getSize() const {return size;}
 
 };
