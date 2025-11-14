@@ -1,7 +1,7 @@
 #ifndef HEAP_H
 #define HEAP_H
 
-#include "./arrayList.h"
+#include "./arraylist.h"
 
 template <typename T>
 class Heap

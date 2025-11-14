@@ -1,7 +1,9 @@
 #ifndef HASH_TABLE_H
 #define HASH_TABLE_H
 
-#include "./arrayList.h"
+#include <iostream>
+
+#include "./arraylist.h"
 
 template <typename K, typename V>
 class Hashtable
@@ -29,6 +31,7 @@ private:
     int length;
 
     std::hash<K> h;
+
 
     int hash(K key)
     {
@@ -80,7 +83,7 @@ public:
         size += 1;
     }
 
-    bool contains(K k)
+    bool containsKey(K k)
     {
         int index = hash(k);
 
@@ -93,6 +96,7 @@ public:
         }
         return false;
     }
+
 
     V get(K k)
     {
@@ -158,6 +162,56 @@ public:
     }
 
     int getSize() {return size;}
+
+    class HashIterator
+    {
+    private:
+
+        Hashtable<K, V>* ht;
+
+        int index1;
+        int index2;
+        
+        int counter;
+    public:
+        void begin(Hashtable<K, V>& htable)
+        {
+            ht = &htable;
+            index1 = 0;
+            index2 = -1;
+            counter = 0;
+
+            next();
+        }
+
+        void next()
+        {
+            if (counter > ht->size)
+            {
+                throw std::runtime_error("The iterator has not next value");
+            }
+
+            while (index2 + 1 >= ht->arrays[index1].getSize())
+            {
+                index2 = -1;
+                index1 += 1;
+            }
+            index2 += 1;
+            counter += 1;
+        }
+
+        bool hasNext()
+        {
+            return counter <= ht->size;
+        }
+
+        V getData()
+        {
+            return ht->arrays[index1].get(index2).getValue();
+        }
+
+    };
+
 };
 
 #endif
