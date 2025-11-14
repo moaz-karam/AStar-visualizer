@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-#include "./arraylist.h"
+#include "./arraylist.hpp"
 
 template <typename K, typename V>
 class Hashtable
@@ -18,12 +18,12 @@ private:
 
     public:
         HashNode() {};
-        HashNode(K k, V v) {key = k; value = v;}
-        K getKey() {return key;}
-        V getValue() {return value;}
+        HashNode(K& k, V& v) {key = k; value = v;}
+        K& getKey() {return key;}
+        V& getValue() {return value;}
 
-        void setKey(K k) {key = k;}
-        void setValue(V v) {value = v;}
+        void setKey(K& k) {key = k;}
+        void setValue(V& v) {value = v;}
     };
 
     ArrayList<HashNode>* arrays;
@@ -70,20 +70,30 @@ public:
         delete [] arrays;
     }
 
-    void insert(K k, V v)
+    void insert(K k, V& v)
     {
         if ((float)size / (float)length >= 1)
         {
             resize(2);
         }
+        
         HashNode n(k, v);
         int index = hash(k);
+
+        for (int i = 0; i < arrays[index].getSize(); i += 1)
+        {
+            if (k == arrays[index].get(i).getKey())
+            {
+                arrays[index].get(i).setValue(v);
+                return;
+            }
+        }
         arrays[index].push(n);
         
         size += 1;
     }
 
-    bool containsKey(K k)
+    bool containsKey(K& k)
     {
         int index = hash(k);
 
@@ -98,7 +108,7 @@ public:
     }
 
 
-    V get(K k)
+    V& get(K k)
     {
         int index = hash(k);
 
@@ -112,7 +122,7 @@ public:
         throw std::runtime_error("The item with the key value does not exist in the table");
     }
 
-    void set(K k, V v)
+    void set(K& k, V& v)
     {
         int index = hash(k);
 
@@ -127,7 +137,7 @@ public:
         throw std::runtime_error("The item with the key value does not exist in the table");
     }
 
-    V remove(K k)
+    V& remove(K& k)
     {
         if (length > 32 && ((float)size / (float)length) < 0.25)
         {
@@ -205,7 +215,7 @@ public:
             return counter <= ht->size;
         }
 
-        V getData()
+        V& getData()
         {
             return ht->arrays[index1].get(index2).getValue();
         }

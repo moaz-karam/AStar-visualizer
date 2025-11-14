@@ -3,25 +3,41 @@
 #include <raylib.h>
 #include <raygui.h>
 
-#include "../data_structures/hashtable.h"
+#include "../algorithms/searcher.hpp"
 
 int main()
 {
 
-    Hashtable<int, int> ht;
-    for (int i = 0; i < 100; i += 1)
+    InitWindow(800, 800, "Visualizer");
+
+    Searcher searcher(Vector2{.x = 0, .y = 0}, Vector2{.x = 800, .y = 800});
+
+    Hashtable<int, Cell>::HashIterator iter;
+
+    while (!WindowShouldClose())
     {
-        ht.insert(i, i);
+        BeginDrawing();
+
+        // add particles if mouse is pressed
+        if (IsMouseButtonDown(MOUSE_LEFT_BUTTON))
+        {
+            searcher.press(GetMousePosition());
+        }
+
+        // update the searcher and start the iterator
+        searcher.update(iter);
+
+        // draw the cells with the help of the iterator
+        for (iter; iter.hasNext(); iter.next())
+        {
+            Cell cc = iter.getData();
+            DrawRectangle(cc.rect.x, cc.rect.y, cc.rect.width, cc.rect.height, cc.color);
+        }
+
+        EndDrawing();
     }
 
-    Hashtable<int, int>::HashIterator iter;
-
-    iter.begin(ht);
-
-    for (iter; iter.hasNext(); iter.next())
-    {
-        std::cout << iter.getData() << std::endl;
-    }
+    CloseWindow();
 
     return 0;
 }

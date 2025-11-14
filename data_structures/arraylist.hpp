@@ -50,7 +50,7 @@ public:
 
     bool isEmpty() {return size == 0;}
 
-    void push(T item)
+    void push(T& item)
     {
         if (size / length == 1)
         {
@@ -76,7 +76,7 @@ public:
     }
 
 
-    void set(int i, T item) {items[i] = item;}
+    void set(int i, T& item) {items[i] = item;}
     T& get(int i) const {return items[i];}
     int getSize() const {return size;}
 

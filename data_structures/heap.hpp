@@ -1,7 +1,7 @@
 #ifndef HEAP_H
 #define HEAP_H
 
-#include "./arraylist.h"
+#include "./arraylist.hpp"
 
 template <typename T>
 class Heap
@@ -14,14 +14,14 @@ private:
         float p;
     public:
         HeapNode() {}
-        HeapNode(T item, float priority)
+        HeapNode(T& item, float priority)
         {
             i = item;
             p = priority;
         }
-        T getI() {return i;}
+        T& getI() {return i;}
         float getP() {return p;}
-        void setI(T item) {i = item;}
+        void setI(T& item) {i = item;}
         void setP(float priority) {p = priority;}
 
     };
@@ -83,7 +83,7 @@ public:
 
     bool isEmpty() {return items.isEmpty();}
 
-    void add(T item, float p)
+    void add(T& item, float p)
     {
         HeapNode n(item, p);
 
@@ -104,7 +104,7 @@ public:
     }
 
 
-    T removeSmallest()
+    T& removeSmallest()
     {
         if (isEmpty())
         {
@@ -155,13 +155,13 @@ public:
         return temp;
     }
 
-    T getSmallest()
+    T& getSmallest()
     {
         return items.get(0).getI();
     }
     
     
-    T get(int i) {return items.get(i).getI();}
+    T& get(int i) {return items.get(i).getI();}
     float getP(int i) {return items.get(i).getP();}
 };
 
