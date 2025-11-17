@@ -14,13 +14,13 @@ int main()
 
     Hashtable<int, CellType>::HashIterator iter;
 
-    // SetTargetFPS(60);
 
     while (!WindowShouldClose())
     {
         BeginDrawing();
+        
 
-        DrawRectangle(0, 0, 800, 800, WHITE);
+        ClearBackground(WHITE);
 
         // select the type
         if (IsKeyPressed(KEY_S))
@@ -66,8 +66,11 @@ int main()
         }
 
         // draw the current cell with red
-        rect = searcher.generateRect(searcher.getCurrentKey());
-        DrawRectangle(rect.x, rect.y, rect.width, rect.height, RED);
+        if (!searcher.isPathFound())
+        {
+            rect = searcher.generateRect(searcher.getCurrentKey());
+            DrawRectangle(rect.x, rect.y, rect.width, rect.height, RED);
+        }
 
         EndDrawing();
     }

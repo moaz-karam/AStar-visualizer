@@ -72,7 +72,7 @@ public:
 
     void insert(K k, V v)
     {
-        if ((float)size / (float)length >= 1)
+        if ((float)size / (float)length >= 0.75)
         {
             resize(2);
         }

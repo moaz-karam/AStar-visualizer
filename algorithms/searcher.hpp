@@ -17,7 +17,7 @@ enum CellType
     SOURCE = 0, CHECKED = 1, WALL = 2, TARGET = 3, PATH = 4, REMOVE
 };
 
-const Color COLORS[] = {DARKGREEN, SKYBLUE, BROWN, DARKBLUE, MAROON};
+const Color COLORS[] = {DARKGREEN, SKYBLUE, BROWN, DARKBLUE, YELLOW};
 
 
 struct Vector2I
@@ -148,8 +148,8 @@ private:
         }
         else if (ct == REMOVE)
         {
-            // user cann't remove the source or the target
-            if (grid.table.containsKey(key) && grid.table.get(key) != CHECKED)
+            // user can only remove the walls
+            if (grid.table.containsKey(key) && (grid.table.get(key) == WALL))
             {
                 grid.table.remove(key);
             }
@@ -249,6 +249,7 @@ public:
 
     virtual bool isRunning() {return running;}
 
+    virtual bool isPathFound() {return pathFound;}
 
     // generates the rectangle to be drawn to the screen
     virtual Rectangle generateRect(int key)
@@ -280,7 +281,11 @@ public:
                 {
                     int newKey = generateKey(currentPos.x + currentEdge.x, currentPos.y + currentEdge.y);
 
-                    if (newKey == targetKey) pathFound = true;
+                    if (newKey == targetKey)
+                    {
+                        pathFound = true;
+                        from.insert(targetKey, currentKey);
+                    }
     
                     // only add the new cell if it's added to the grid successfully
                     if (putToGrid(newKey, CHECKED))
@@ -289,6 +294,14 @@ public:
                     }
                 }
                 iterate();
+            }
+            else
+            {
+                if (currentKey != sourceKey)
+                {
+                    putToGrid(currentKey, PATH);
+                    currentKey = from.get(currentKey);
+                }
             }
         }
 
