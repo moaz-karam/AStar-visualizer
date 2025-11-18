@@ -59,6 +59,11 @@ private:
     Vector2I currentPos;
     int currentKey;
 
+    int xDiff;
+    int yDiff;
+    
+    bool dragging;
+
     // helper methods
     // ---------------------------------------------------------------------------------------------------------
 
@@ -71,8 +76,8 @@ private:
     virtual Vector2I getGridCoordinates(Vector2 mouse)
     {
         Vector2I v;
-        v.x = ((int)(mouse.x) - grid.startingPoint.x) / CELL_WIDTH;
-        v.y = ((int)(mouse.y) - grid.startingPoint.y) / CELL_HEIGHT;
+        v.x = ((int)(mouse.x) - (grid.startingPoint.x + xDiff)) / CELL_WIDTH;
+        v.y = ((int)(mouse.y) - (grid.startingPoint.y + yDiff)) / CELL_HEIGHT;
         return v;
     }
 
@@ -172,6 +177,11 @@ public:
 
         putToGrid(grid.cellsNumber.y / 2 * grid.cellsNumber.x, TARGET);
         putToGrid(grid.cellsNumber.x - 1 + grid.cellsNumber.y / 2 * grid.cellsNumber.x, SOURCE);
+
+        xDiff = 0;
+        yDiff = 0;
+
+        dragging = false;
     }
 
 
@@ -202,6 +212,16 @@ public:
         }
     }
 
+    virtual void startDragging(){dragging = true;}
+    virtual void stopDragging() {dragging = false;}
+
+    virtual bool isDragging() {return dragging;}
+
+    virtual void drag(int x, int y)
+    {
+        xDiff += x;
+        yDiff += y;
+    }
 
     virtual int getCurrentKey()
     {
@@ -220,8 +240,8 @@ public:
         rect->width = CELL_WIDTH;
         rect->height = CELL_HEIGHT;
 
-        rect->x = x * CELL_WIDTH + grid.startingPoint.x;
-        rect->y = y * CELL_HEIGHT + grid.startingPoint.y;
+        rect->x = x * CELL_WIDTH + grid.startingPoint.x + xDiff;
+        rect->y = y * CELL_HEIGHT + grid.startingPoint.y + yDiff;
 
     }
 
