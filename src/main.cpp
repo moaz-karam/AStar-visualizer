@@ -9,11 +9,11 @@
 int main()
 {
 
-    InitWindow(800, 800, "Visualizer");
+    InitWindow(1920, 1080, "Visualizer");
 
-    Searcher searcher(Vector2{.x = 0, .y = 0}, Vector2{.x = 800, .y = 800});
+    Searcher searcher(Vector2{.x = 0, .y = 0}, Vector2{.x = 1920, .y = 1080});
 
-    Hashtable<int, CellType>::HashIterator iter;
+    Hashtable<Vector2I, CellType>::HashIterator iter;
 
     SetTargetFPS(120);
 
@@ -78,14 +78,20 @@ int main()
         for (iter; iter.hasNext(); iter.next())
         {
             searcher.generateRect(iter.getKey(), &rect);
-            DrawRectangle(rect.x, rect.y, rect.width, rect.height, COLORS[iter.getValue()]);
+            if (searcher.isInRange(rect))
+            {
+                DrawRectangle(rect.x, rect.y, rect.width, rect.height, COLORS[iter.getValue()]);
+            }
         }
 
         // draw the current cell with red
         if (!searcher.isPathFound())
         {
-            searcher.generateRect(searcher.getCurrentKey(), &rect);
-            DrawRectangle(rect.x, rect.y, rect.width, rect.height, RED);
+            searcher.generateRect(searcher.getCurrentPos(), &rect);
+            if (searcher.isInRange(rect))
+            {
+                DrawRectangle(rect.x, rect.y, rect.width, rect.height, RED);
+            }
         }
 
 
