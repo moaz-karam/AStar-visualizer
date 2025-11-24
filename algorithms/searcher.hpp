@@ -1,7 +1,7 @@
 #ifndef SEARCHER_H
 #define SEARCHER_H
 
-#include <raylib.h>
+#include "../include/raylib.h"
 #include "../data_structures/hashtable.hpp"
 #include "../data_structures/heap.hpp"
 #include <iostream>
@@ -59,10 +59,10 @@ private:
 
     struct Grid
     {
-        float cellDimension;
-        Vector2I startingPoint;
+        int cellDimension;
+        Vector2 startingPoint;
         Vector2I cellsNumber;
-        Vector2 dimensions = dimensions;;
+        Vector2 dimensions;
         Hashtable<Vector2I, CellType> table;
     };
 
@@ -232,7 +232,7 @@ public:
         yDiff += y;
     }
 
-    virtual void zoom(int n)
+    virtual void zoom(float n)
     {
         grid.cellDimension = std::max(n + grid.cellDimension, 10.0f);
 
@@ -263,30 +263,56 @@ public:
 
     virtual bool isInRange(Rectangle rect)
     {
-        return rect.x >= -grid.cellDimension && rect.x <= (grid.cellsNumber.x + 1) * grid.cellDimension
-            && rect.y >= -grid.cellDimension && rect.y <= (grid.cellsNumber.y + 1) * grid.cellDimension;
+        return rect.x - grid.startingPoint.x >= -grid.cellDimension && rect.x <= grid.cellsNumber.x * grid.cellDimension + grid.startingPoint.x
+            && rect.y - grid.startingPoint.y >= -grid.cellDimension && rect.y <= (grid.cellsNumber.y + 1) * grid.cellDimension + grid.startingPoint.y;
     }
 
-    virtual int getCellDimemsion()
+
+    virtual bool isColumn(int colNumber)
     {
-        return grid.cellDimension;
+
+        int firstX = xDiff % grid.cellDimension + grid.startingPoint.x;
+
+        int x = firstX + (colNumber - 1) * grid.cellDimension;
+
+        return x < grid.startingPoint.x + grid.dimensions.x;
     }
 
-    virtual Vector2 getDimensions()
+    virtual void getColumn(int colNumber, Vector2* sp, Vector2* ep)
     {
-        return grid.dimensions;
+        sp->y = grid.startingPoint.y;
+        ep->y = grid.startingPoint.y + grid.dimensions.y;
+
+        int firstX = xDiff % grid.cellDimension + grid.startingPoint.x;
+
+        int x = firstX + (colNumber - 1) * grid.cellDimension;
+
+        sp->x = x;
+        ep->x = x;
     }
 
-    virtual Vector2I getCellsNumber()
+    virtual bool isRow(int rowNumber)
     {
-        return grid.cellsNumber;
+        int firstY = yDiff % grid.cellDimension + grid.startingPoint.y;
+
+        int y = firstY + (rowNumber - 1) * grid.cellDimension;
+
+        return y <= grid.startingPoint.y + grid.dimensions.y;
     }
 
-    virtual Vector2I getDiff()
+    virtual void getRow(int rowNumber, Vector2* sp, Vector2* ep)
     {
-        return (Vector2I){xDiff, yDiff};
-    }
 
+        sp->x = grid.startingPoint.x;
+        ep->x = grid.startingPoint.x + grid.dimensions.x;
+
+        int firstY = yDiff % grid.cellDimension + grid.startingPoint.y;
+
+        int y = firstY + (rowNumber - 1) * grid.cellDimension;
+
+        sp->y = y;
+        ep->y = y;
+    }
 
     virtual void update(Hashtable<Vector2I, CellType>::HashIterator& iter)
     {

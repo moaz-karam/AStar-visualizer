@@ -1,7 +1,8 @@
 
 
-#include <raylib.h>
-#include <raygui.h>
+#include "../include/raylib.h"
+#include "../include/raygui.h"
+
 #include "../algorithms/searcher.hpp"
 
 #define FRAMES 60.0f
@@ -9,9 +10,9 @@
 int main()
 {
 
-    InitWindow(1920, 1080, "Visualizer");
+    InitWindow(800, 800, "Visualizer");
 
-    Searcher searcher(Vector2{.x = 0, .y = 0}, Vector2{.x = 1920, .y = 1080});
+    Searcher searcher(Vector2{.x = 200, .y = 200}, Vector2{.x = 400, .y = 400});
 
     Hashtable<Vector2I, CellType>::HashIterator iter;
 
@@ -22,6 +23,9 @@ int main()
         BeginDrawing();
 
         ClearBackground(WHITE);
+
+
+        DrawRectangle(200, 200, 400, 400, BLUE);
 
         // select the type
         if (IsKeyPressed(KEY_S))
@@ -86,23 +90,21 @@ int main()
             }
         }
 
-        // drawing grid lines
-        Vector2I diff = searcher.getDiff();
-        Vector2I cellsNumber = searcher.getCellsNumber();
-        Vector2 dimensions = searcher.getDimensions();
-        int cellDimension = searcher.getCellDimemsion();
+        Vector2 sPoint;
+        Vector2 ePoint;
 
+        for (int col = 1; searcher.isColumn(col); col += 1)
+        {
+            searcher.getColumn(col, &sPoint, &ePoint);
+            DrawLine(sPoint.x, sPoint.y, ePoint.x, ePoint.y, ColorAlpha(BLACK, 1));
+        }
 
-        for (float x = diff.x % cellDimension; x <= dimensions.x + diff.x % cellDimension; x += cellDimension)
+        for (int row = 1; searcher.isRow(row); row += 1)
         {
-            DrawLine(x, 0, x, dimensions.y, BLACK);
+            searcher.getRow(row, &sPoint, &ePoint);
+            DrawLine(sPoint.x, sPoint.y, ePoint.x, ePoint.y, ColorAlpha(BLACK, 1));
         }
-        
-        
-        for (float y = diff.y % cellDimension; y <= dimensions.y + diff.y % cellDimension; y += cellDimension)
-        {
-            DrawLine(0, y, dimensions.x, y, BLACK);
-        }
+
 
         EndDrawing();
     }
