@@ -273,7 +273,7 @@ public:
 
         int firstX = xDiff % grid.cellDimension + grid.startingPoint.x;
 
-        int x = firstX + (colNumber - 1) * grid.cellDimension;
+        int x = firstX + (colNumber - (firstX >= grid.startingPoint.x)) * grid.cellDimension;
 
         return x < grid.startingPoint.x + grid.dimensions.x;
     }
@@ -285,7 +285,7 @@ public:
 
         int firstX = xDiff % grid.cellDimension + grid.startingPoint.x;
 
-        int x = firstX + (colNumber - 1) * grid.cellDimension;
+        int x = firstX + (colNumber - (firstX >= grid.startingPoint.x)) * grid.cellDimension;
 
         sp->x = x;
         ep->x = x;
@@ -294,8 +294,8 @@ public:
     virtual bool isRow(int rowNumber)
     {
         int firstY = yDiff % grid.cellDimension + grid.startingPoint.y;
-
-        int y = firstY + (rowNumber - 1) * grid.cellDimension;
+        
+        int y = firstY + (rowNumber - (firstY >= grid.startingPoint.y)) * grid.cellDimension;
 
         return y <= grid.startingPoint.y + grid.dimensions.y;
     }
@@ -308,7 +308,7 @@ public:
 
         int firstY = yDiff % grid.cellDimension + grid.startingPoint.y;
 
-        int y = firstY + (rowNumber - 1) * grid.cellDimension;
+        int y = firstY + (rowNumber - (firstY >= grid.startingPoint.y)) * grid.cellDimension;
 
         sp->y = y;
         ep->y = y;
