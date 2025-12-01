@@ -1,8 +1,8 @@
 #ifndef CONTROLS_H
 #define CONTROLS_H
 
-#include <raylib.h>
-#include <raygui.h>
+#include "../include/raylib.h"
+#include "../include/raygui.h"
 
 class Button
 {

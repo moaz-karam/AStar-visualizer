@@ -61,7 +61,7 @@ private:
     {
         int cellDimension;
         Vector2 startingPoint;
-        Vector2I cellsNumber;
+        Vector2 cellsNumber;
         Vector2 dimensions;
         Hashtable<Vector2I, CellType> table;
     };
@@ -187,8 +187,8 @@ public:
         sourcePos = Vector2I{.x = -1000,.y = -1000};
         targetPos = Vector2I{.x = -1000,.y = -1000};
 
-        putToGrid((Vector2I){.x = 0, .y = grid.cellsNumber.y / 2}, TARGET);
-        putToGrid((Vector2I){.x = grid.cellsNumber.x - 1, .y = grid.cellsNumber.y / 2}, SOURCE);
+        putToGrid((Vector2I){.x = 0, .y = (int)grid.cellsNumber.y / 2}, TARGET);
+        putToGrid((Vector2I){.x = (int)grid.cellsNumber.x - 1, .y = (int)grid.cellsNumber.y / 2}, SOURCE);
 
         xDiff = 0;
         yDiff = 0;
