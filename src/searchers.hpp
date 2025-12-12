@@ -12,7 +12,7 @@ enum CellType
     CHECKED = 0, WALL = 1, PATH = 2, SOURCE = 3, TARGET = 4, REMOVE, 
 };
 
-const Color COLORS[] = {SKYBLUE, BROWN, YELLOW, DARKGREEN, DARKBLUE,};
+const Color COLORS[] = {SKYBLUE, BROWN, YELLOW, ORANGE, DARKBLUE,};
 
 
 
@@ -107,6 +107,13 @@ protected:
         v.x = ((int)(mouse.x) - (grid.startingPoint.x + xDiff)) / grid.cellDimension;
         v.y = ((int)(mouse.y) - (grid.startingPoint.y + yDiff)) / grid.cellDimension;
         return v;
+    }
+
+    bool isMouseInGrid(Vector2 mouse)
+    {
+        return mouse.x > grid.startingPoint.x && mouse.y > grid.startingPoint.y
+            && mouse.x < grid.startingPoint.x + grid.dimensions.x
+            && mouse.y < grid.startingPoint.y + grid.dimensions.y;
     }
 
     virtual void addEdgeFrom(Vector2I vertex, Vector2I fromVertex)
@@ -217,7 +224,7 @@ public:
 
     virtual void press(Vector2 mouse)
     {
-        if (running) {return;}
+        if (running || !isMouseInGrid(mouse)) {return;}
         Vector2I pos = getGridCoordinates(mouse);
         putToGrid(pos, selectedType);
     }
