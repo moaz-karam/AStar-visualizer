@@ -7,6 +7,9 @@
 #include "../data_structures/hashtable.hpp"
 #include "../data_structures/heap.hpp"
 
+#define DIJKSTRA 0
+#define ASTAR 1
+
 enum CellType
 {
     CHECKED = 0, WALL = 1, PATH = 2, SOURCE = 3, TARGET = 4, REMOVE, 
@@ -204,6 +207,47 @@ public:
         dragging = false;
     }
 
+    explicit Searcher(Searcher* otherSearcher)
+    {
+        this->grid.startingPoint.x = otherSearcher->grid.startingPoint.x;
+        this->grid.startingPoint.y = otherSearcher->grid.startingPoint.y;
+
+        this->grid.cellDimension = otherSearcher->grid.cellDimension;
+
+        this->grid.dimensions = otherSearcher->grid.dimensions;
+
+        this->grid.cellsNumber.x = otherSearcher->grid.cellsNumber.x;
+        this->grid.cellsNumber.y = otherSearcher->grid.cellsNumber.y;
+        
+
+        
+        running = false;
+        this->selectedType = otherSearcher->selectedType;
+        this->pathFound = otherSearcher->pathFound;
+
+        this->sourcePos = otherSearcher->sourcePos;
+        this->targetPos = otherSearcher->targetPos;
+
+        this->putToGrid(sourcePos, SOURCE);
+        this->putToGrid(targetPos, TARGET);
+
+        this->xDiff = otherSearcher->xDiff;
+        this->yDiff = otherSearcher->yDiff;
+
+        Hashtable<Vector2I, CellType>::HashIterator iter;
+        iter.begin(otherSearcher->grid.table);
+
+        for (iter; iter.hasNext(); iter.next())
+        {
+            if (iter.getValue() == WALL)
+            {
+                putToGrid(iter.getKey(), WALL);
+            }
+        }
+
+        pathFound = false;
+        dragging = false;
+    }
 
 
 
@@ -417,6 +461,9 @@ public:
     Dijkstra(Vector2 startingPos, Vector2 dimensions):Searcher(startingPos, dimensions)
     {
     }
+    Dijkstra(Searcher* otherSearcher):Searcher(otherSearcher)
+    {
+    }
 };
 
 
@@ -441,6 +488,9 @@ private:
     }
 public:
     AStar(Vector2 startingPos, Vector2 dimensions):Searcher(startingPos, dimensions)
+    {
+    }
+    AStar(Searcher* otherSearcher):Searcher(otherSearcher)
     {
     }
 };
