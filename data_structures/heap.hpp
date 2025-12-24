@@ -1,6 +1,7 @@
 #ifndef HEAP_H
 #define HEAP_H
 
+#include <iostream>
 #include "./arraylist.hpp"
 
 template <typename T>
@@ -164,6 +165,7 @@ public:
     T& get(int i) {return items.get(i).getI();}
     float getP(int i) {return items.get(i).getP();}
     int getSize() {return items.getSize();}
+    void clear() {items.clear();}
 };
 
 #endif

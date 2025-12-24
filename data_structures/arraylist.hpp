@@ -1,6 +1,8 @@
 #ifndef ARRAY_LIST_H
 #define ARRAY_LIST_H
 
+#include <iostream>
+
 template <typename T>
 class ArrayList
 {
@@ -79,7 +81,13 @@ public:
     void set(int i, T& item) {items[i] = item;}
     T& get(int i) const {return items[i];}
     int getSize() const {return size;}
-
+    void clear()
+    {
+        delete[] items;
+        size = 0;
+        length = 4;
+        items = new T[length];
+    }
 };
 
 #endif

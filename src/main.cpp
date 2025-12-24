@@ -22,8 +22,8 @@ Button startBtn({0, 0, BUTTON_WIDTH, BUTTON_HEIGHT}, "START", GREEN);
 Button sourceBtn({200, 0, BUTTON_WIDTH, BUTTON_HEIGHT}, "SOURCE", ORANGE);
 Button targetBtn({400, 0, BUTTON_WIDTH, BUTTON_HEIGHT}, "TARGET", DARKBLUE);
 Button wallBtn({600, 0, BUTTON_WIDTH, BUTTON_HEIGHT}, "WALL", BROWN);
-Button removeBtn({0, 100, BUTTON_WIDTH, BUTTON_HEIGHT}, "REMOVE", GRAY);
-Button pauseBtn({200, 100, BUTTON_WIDTH, BUTTON_HEIGHT}, "PAUSE", RED);
+Button removeBtn({0, 100, BUTTON_WIDTH, BUTTON_HEIGHT}, "REMOVE", RED);
+Button clearBtn({200, 100, BUTTON_WIDTH, BUTTON_HEIGHT}, "CLEAR", GRAY);
 Button astarBtn({400, 100, BUTTON_WIDTH, BUTTON_HEIGHT}, "ASTAR", YELLOW);
 Button dijkstraBtn({600, 100, BUTTON_WIDTH, BUTTON_HEIGHT}, "DIJKSTRA", PURPLE);
 
@@ -68,9 +68,9 @@ void updateButtons(Vector2 mouse, bool isPressed)
     {
         searcher->select(REMOVE);
     }
-    if (pauseBtn.updateState(mouse, isPressed))
+    if (clearBtn.updateState(mouse, isPressed))
     {
-        searcher->pause();
+        searcher->clear();
     }
     if (astarBtn.updateState(mouse, isPressed))
     {

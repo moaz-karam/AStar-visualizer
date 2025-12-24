@@ -262,9 +262,20 @@ public:
         heap.add(sourcePos, 0);
 
     }
-    virtual void pause() {running = false;}
+    virtual void clear()
+    {
+        heap.clear();
+        distTo.clear();
+        from.clear();
 
+        grid.table.clear();
+        putToGrid(sourcePos, SOURCE);
+        putToGrid(targetPos, TARGET);
 
+        running = false;
+        pathFound = false;
+        dragging = false;
+    }
 
     virtual void press(Vector2 mouse)
     {

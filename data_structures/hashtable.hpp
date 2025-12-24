@@ -162,13 +162,12 @@ public:
         throw std::runtime_error("The item with the key value does not exist in the table");
     }
 
-    void printSizes()
+    void clear()
     {
-        for (int i = 0; i < length; i += 1)
-        {
-            std::cout << arrays[i].getSize() << std::endl;
-        }
-        std::cout << length << std::endl;
+        delete[] arrays;
+        size = 0;
+        length = 4;
+        arrays = new ArrayList<HashNode>[length];
     }
 
     int getSize() {return size;}
