@@ -273,7 +273,24 @@ public:
 
 
 
-    virtual void select(CellType ct) {selectedType = ct;}
+    virtual void select(CellType ct)
+    {
+        selectedType = ct;
+        // if the source or the target are selected
+        // the search is restarted
+        if (selectedType == SOURCE || selectedType == TARGET)
+        {
+            ArrayList<Vector2I> walls;
+            Hashtable<Vector2I, CellType>::HashIterator iter;
+            iter.begin(grid.table);
+            for (iter; iter.hasNext(); iter.next())
+            {
+                if (iter.getValue() == WALL) walls.push(iter.getKey());
+            }
+            clear();
+            for (int i = 0; i < walls.getSize(); i += 1) putToGrid(walls.get(i), WALL);
+        }
+    }
     virtual void run()
     {
         running = true;
