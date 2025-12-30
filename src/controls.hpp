@@ -28,16 +28,17 @@ private:
     }
 
 
-    Color getColor()
+    Color getColor(bool isSelected)
     {
+        if (isSelected) return ColorBrightness(color, -0.25);
         if (state == NORMAL) return color;
         else if (state == HOVER) return ColorBrightness(color, 0.3);
         else return ColorBrightness(color, -0.3);
     }
 
-    void drawButton()
+    void drawButton(bool isSelected)
     {
-        DrawRectangleRec(rect, getColor());
+        DrawRectangleRec(rect, getColor(isSelected));
         Vector2 textSize = MeasureTextEx(GetFontDefault(), text, fontSize, FONT_SPACING);
         Vector2 textPos;
         textPos.x = rect.x + (rect.width - textSize.x) / 2;
@@ -67,16 +68,16 @@ public:
     }
 
     // must be called before drawing the button
-    bool updateState(Vector2 mouse, bool isPressed)
+    bool updateState(Vector2 mouse, bool isPressed, bool isSelected)
     {
         if (isUnderMouse(mouse))
         {
             state = HOVER;
             if (isPressed) state = PRESSED;
         }
-        else{state = NORMAL;}
+        else state = NORMAL;
 
-        drawButton();
+        drawButton(isSelected);
         return isButtonPressed();
     }
     void setRect(float x, float y, float w, float h)

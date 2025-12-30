@@ -43,6 +43,9 @@ Button algorithmButtons[ALGORITHM_BUTTONS_NUMBER];
 const char* algorithmButtonsText[] = {"ALGORITHMS: ", "DIJKSTRA", "ASTAR"};
 const Color algorithmButtonsColor[] = {WHITE, PURPLE, YELLOW};
 
+int currentControl;
+int currentAlgorithm;
+
 void selectSearcherType(int type)
 {
     if (searcherType == type) return;
@@ -65,46 +68,56 @@ void selectSearcherType(int type)
 void updateButtons(Vector2 mouse, bool isPressed)
 {
     // drawing titles
-    controlButtons[CONTROLS_CONTROL].updateState(mouse, false);
-    algorithmButtons[ALGORITHMS].updateState(mouse, false);
+    controlButtons[CONTROLS_CONTROL].updateState(mouse, false, false);
+    algorithmButtons[ALGORITHMS].updateState(mouse, false, false);
 
     // drawing buttons
-    if (controlButtons[START_CONTROL].updateState(mouse, isPressed))
+    if (controlButtons[START_CONTROL].updateState(mouse, isPressed, currentControl == START_CONTROL))
     {
         searcher->run();
+        currentControl = START_CONTROL;
     }
-    if (controlButtons[CLEAR_CONTROL].updateState(mouse, isPressed))
+    if (controlButtons[CLEAR_CONTROL].updateState(mouse, isPressed, false))
     {
         searcher->clear();
     }
-    if (controlButtons[SOURCE_CONTROL].updateState(mouse, isPressed))
+    if (controlButtons[SOURCE_CONTROL].updateState(mouse, isPressed, currentControl == SOURCE_CONTROL))
     {
         searcher->select(SOURCE);
+        currentControl = SOURCE_CONTROL;
     }
-    if (controlButtons[TARGET_CONTROL].updateState(mouse, isPressed))
+    if (controlButtons[TARGET_CONTROL].updateState(mouse, isPressed, currentControl == TARGET_CONTROL))
     {
         searcher->select(TARGET);
+        currentControl = TARGET_CONTROL;
     }
-    if (controlButtons[WALL_CONTROL].updateState(mouse, isPressed))
+    if (controlButtons[WALL_CONTROL].updateState(mouse, isPressed, currentControl == WALL_CONTROL))
     {
         searcher->select(WALL);
+        currentControl = WALL_CONTROL;
     }
-    if (controlButtons[REMOVE_CONTROL].updateState(mouse, isPressed))
+    if (controlButtons[REMOVE_CONTROL].updateState(mouse, isPressed, currentControl == REMOVE_CONTROL))
     {
         searcher->select(REMOVE);
+        currentControl = REMOVE_CONTROL;
     }
-    if (algorithmButtons[DIJKSTRA].updateState(mouse, isPressed))
+    if (algorithmButtons[DIJKSTRA].updateState(mouse, isPressed, currentAlgorithm == DIJKSTRA))
     {
         selectSearcherType(DIJKSTRA);
+        currentAlgorithm = DIJKSTRA;
     }
-    if (algorithmButtons[ASTAR].updateState(mouse, isPressed))
+    if (algorithmButtons[ASTAR].updateState(mouse, isPressed, currentAlgorithm == ASTAR))
     {
         selectSearcherType(ASTAR);
+        currentAlgorithm = ASTAR;
     }
 }
 
 void initButtons()
 {
+    currentControl = WALL_CONTROL;
+    currentAlgorithm = DIJKSTRA;
+
     // control buttons initialization
     for (int i = 0; i < CONTROL_BUTTONS_NUMBER; i += 1)
     {
