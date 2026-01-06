@@ -2,6 +2,7 @@
 #define SEARCHER_H
 
 #include <math.h>
+#include <time.h>
 
 #include "../include/raylib.h"
 #include "../data_structures/hashtable.hpp"
@@ -9,6 +10,7 @@
 
 #define MIN_CELL_DIMENSION 20.0f
 #define ITERATIONS_PER_UPDATE 5
+#define CELL_TIME_SECONDS 0.2f
 
 enum CellType
 {
@@ -17,7 +19,11 @@ enum CellType
 
 const Color COLORS[] = {SKYBLUE, BROWN, YELLOW, ORANGE, DARKBLUE,};
 
-
+struct Cell
+{
+    CellType ct;
+    clock_t st;
+};
 
 struct Vector2I
 {
@@ -68,7 +74,7 @@ private:
         Vector2 startingPoint;
         Vector2 cellsNumber;
         Vector2 dimensions;
-        Hashtable<Vector2I, CellType> table;
+        Hashtable<Vector2I, Cell> table;
     };
 
     bool running;
@@ -140,6 +146,29 @@ protected:
         }
     }
 
+    virtual void applyRectConstraints(Rectangle* rect)
+    {
+        if (rect->x < grid.startingPoint.x)
+        {
+            rect->width = rect->width - (grid.startingPoint.x - rect->x);
+            rect->x = grid.startingPoint.x;
+        }
+        else if (rect->x + rect->width > grid.startingPoint.x + grid.dimensions.x)
+        {
+            rect->width = grid.startingPoint.x + grid.dimensions.x - rect->x;
+        }
+
+        if (rect->y < grid.startingPoint.y)
+        {
+            rect->height = rect->height - (grid.startingPoint.y - rect->y);
+            rect->y = grid.startingPoint.y;
+        }
+        else if (rect->y + rect->height > grid.startingPoint.y + grid.dimensions.y)
+        {
+            rect->height = (grid.startingPoint.y + grid.dimensions.y - rect->y);
+        }
+    }
+
     virtual bool isValidCell(Vector2I cell)
     {
         int maxX = grid.dimensions.x / MIN_CELL_DIMENSION;
@@ -152,17 +181,17 @@ protected:
     virtual void resetSearch()
     {
         ArrayList<Vector2I> walls;
-        Hashtable<Vector2I, CellType>::HashIterator iter;
+        Hashtable<Vector2I, Cell>::HashIterator iter;
         iter.begin(grid.table);
         for (iter; iter.hasNext(); iter.next())
         {
-            if (iter.getValue() == WALL) walls.push(iter.getKey());
+            if (iter.getValue().ct == WALL) walls.push(iter.getKey());
         }
         clear();
-        for (int i = 0; i < walls.getSize(); i += 1) putToGrid(walls.get(i), WALL);
+        for (int i = 0; i < walls.getSize(); i += 1) putToGrid(walls.get(i), WALL, true);
     }
 
-    virtual bool putToGrid(Vector2I key, CellType ct)
+    virtual bool putToGrid(Vector2I key, CellType ct, bool reset)
     {
         if (!isValidCell(key)) return false;
 
@@ -172,13 +201,13 @@ protected:
             // a wall or something of the same type
             if (grid.table.containsKey(key))
             {
-                if (grid.table.get(key) >= ct) return false;
+                if (grid.table.get(key).ct >= ct) return false;
             } 
         }
         else if (ct == REMOVE)
         {
             // user can only remove the walls
-            if (grid.table.containsKey(key) && (grid.table.get(key) == WALL))
+            if (grid.table.containsKey(key) && (grid.table.get(key).ct == WALL))
             {
                 grid.table.remove(key);
             }
@@ -192,18 +221,18 @@ protected:
             if (grid.table.containsKey(sourcePos)) grid.table.remove(sourcePos);
 
             sourcePos = key;
-            grid.table.insert(sourcePos, SOURCE);
+            grid.table.insert(sourcePos, {ct, clock() * !reset});
             return false;
         }
         else if (ct == TARGET)
         {
             if (grid.table.containsKey(targetPos)) grid.table.remove(targetPos);
             targetPos = key;
-            grid.table.insert(targetPos, TARGET);
+            grid.table.insert(targetPos, {ct, clock() * !reset});
             return false;
         }
 
-        grid.table.insert(key, ct);
+        grid.table.insert(key, {ct, clock() * !reset});
         return true;
     }
 
@@ -233,8 +262,8 @@ public:
         sourcePos = Vector2I{.x = -1000,.y = -1000};
         targetPos = Vector2I{.x = -1000,.y = -1000};
 
-        putToGrid((Vector2I){.x = (int)grid.cellsNumber.x / 3, .y = (int)grid.cellsNumber.y / 2}, TARGET);
-        putToGrid((Vector2I){.x = 2 * (int)grid.cellsNumber.x / 3, .y = (int)grid.cellsNumber.y / 2}, SOURCE);
+        putToGrid((Vector2I){.x = (int)grid.cellsNumber.x / 3, .y = (int)grid.cellsNumber.y / 2}, TARGET, false);
+        putToGrid((Vector2I){.x = 2 * (int)grid.cellsNumber.x / 3, .y = (int)grid.cellsNumber.y / 2}, SOURCE, false);
 
         xDiff = 0;
         yDiff = 0;
@@ -263,20 +292,20 @@ public:
         this->sourcePos = otherSearcher->sourcePos;
         this->targetPos = otherSearcher->targetPos;
 
-        this->putToGrid(sourcePos, SOURCE);
-        this->putToGrid(targetPos, TARGET);
+        this->putToGrid(sourcePos, SOURCE, true);
+        this->putToGrid(targetPos, TARGET, true);
 
         this->xDiff = otherSearcher->xDiff;
         this->yDiff = otherSearcher->yDiff;
 
-        Hashtable<Vector2I, CellType>::HashIterator iter;
+        Hashtable<Vector2I, Cell>::HashIterator iter;
         iter.begin(otherSearcher->grid.table);
 
         for (iter; iter.hasNext(); iter.next())
         {
-            if (iter.getValue() == WALL)
+            if (iter.getValue().ct == WALL)
             {
-                putToGrid(iter.getKey(), WALL);
+                putToGrid(iter.getKey(), WALL, true);
             }
         }
 
@@ -310,8 +339,8 @@ public:
         from.clear();
 
         grid.table.clear();
-        putToGrid(sourcePos, SOURCE);
-        putToGrid(targetPos, TARGET);
+        putToGrid(sourcePos, SOURCE, true);
+        putToGrid(targetPos, TARGET, true);
 
         running = false;
         pathFound = false;
@@ -322,7 +351,7 @@ public:
     {
         if (running || !isMouseInGrid(mouse)) {return;}
         Vector2I pos = getGridCoordinates(mouse);
-        putToGrid(pos, selectedType);
+        putToGrid(pos, selectedType, false);
     }
 
     virtual void drag(float x, float y)
@@ -362,43 +391,25 @@ public:
     }
 
     // generates the rectangle to be drawn to the screen
-    virtual void generateRect(Vector2I pos, Rectangle* rect)
+    virtual void generateRect(Vector2I pos, Rectangle* rect, Cell* cell)
     {
-        rect->x = pos.x * grid.cellDimension + grid.startingPoint.x + xDiff;
-        rect->y = pos.y * grid.cellDimension + grid.startingPoint.y + yDiff;
+        clock_t now = clock();
+
+        float timeDiff = (float)(now - cell->st) / CLOCKS_PER_SEC;
+
+        float dimension = (timeDiff / CELL_TIME_SECONDS) * grid.cellDimension;
+
+        rect->width = dimension < grid.cellDimension ? dimension : grid.cellDimension;
+        rect->height = rect->width;
+
+        float cellDiff = (grid.cellDimension - rect->width) / 2.0f;
+        
+        rect->x = pos.x * grid.cellDimension + grid.startingPoint.x + xDiff + cellDiff;
+        rect->y = pos.y * grid.cellDimension + grid.startingPoint.y + yDiff + cellDiff;
 
 
         // conditions are added to prevent drawing outside the grid
-
-        if (rect->x < grid.startingPoint.x)
-        {
-            rect->width = grid.cellDimension - (grid.startingPoint.x - rect->x);
-            rect->x = grid.startingPoint.x;
-        }
-        else if (rect->x + grid.cellDimension > grid.startingPoint.x + grid.dimensions.x)
-        {
-            rect->width = grid.startingPoint.x + grid.dimensions.x - rect->x;
-        }
-        else
-        {
-            rect->width = grid.cellDimension;
-        }
-
-
-        if (rect->y < grid.startingPoint.y)
-        {
-            rect->height = grid.cellDimension - (grid.startingPoint.y - rect->y);
-            rect->y = grid.startingPoint.y;
-        }
-        else if (rect->y + grid.cellDimension > grid.startingPoint.y + grid.dimensions.y)
-        {
-            rect->height = (grid.startingPoint.y + grid.dimensions.y - rect->y);
-        }
-        else
-        {
-            rect->height = grid.cellDimension;
-        }
-
+        applyRectConstraints(rect);
     }
 
     virtual bool isColumn(int colNumber)
@@ -447,7 +458,7 @@ public:
         ep->y = y;
     }
 
-    virtual void update(Hashtable<Vector2I, CellType>::HashIterator& iter)
+    virtual void update(Hashtable<Vector2I, Cell>::HashIterator& iter)
     {
         for (int i = 0; i < ITERATIONS_PER_UPDATE; i += 1)
         {
@@ -479,7 +490,7 @@ public:
                                 }
                 
                                 // only add the new cell if it's added to the grid successfully
-                                if (putToGrid(newPos, CHECKED))
+                                if (putToGrid(newPos, CHECKED, false))
                                 {
                                     addEdgeFrom(newPos, currentPos);
                                 }
@@ -492,7 +503,7 @@ public:
                 {
                     if (currentPos != sourcePos)
                     {
-                        putToGrid(currentPos, PATH);
+                        putToGrid(currentPos, PATH, false);
                         currentPos = from.get(currentPos);
                     }
                 }

@@ -1,11 +1,11 @@
-
+#include <time.h>
 #include "../include/raylib.h"
 #include "../include/raygui.h"
 
 #include "./searchers.hpp"
 #include "./controls.hpp"
 
-#define FRAMES 120.0f
+#define FRAMES 60.0f
 #define BUTTON_WIDTH 200
 #define BUTTON_HEIGHT 60
 #define SCREEN_PARTS 10.0f
@@ -33,7 +33,7 @@ float screenHeight = 0;
 
 int searcherType = DIJKSTRA;
 Searcher* searcher;
-Hashtable<Vector2I, CellType>::HashIterator iter;
+Hashtable<Vector2I, Cell>::HashIterator iter;
 
 Button controlButtons[CONTROL_BUTTONS_NUMBER];
 const char* controlButtonsText[] = {"CONTROLS: ", "START", "CLEAR", "SOURCE", "TARGET", "WALL", "REMOVE"};
@@ -157,13 +157,20 @@ int main()
 
     searcher = new Dijkstra(Vector2{.x = 0, .y = screenHeight / (SCREEN_PARTS)},
          Vector2{.x = screenWidth, .y = (SCREEN_PARTS - 1) * screenHeight / (SCREEN_PARTS)});
-    SetTargetFPS(FRAMES);
 
     initButtons();
+
+    clock_t st = clock();
 
     // initializing buttons
     while (!WindowShouldClose())
     {
+        clock_t now = clock();
+        if ((float)(now - st) / CLOCKS_PER_SEC >= 1.0f / FRAMES)
+        {
+            st = now;
+            continue;
+        }
         BeginDrawing();
 
         ClearBackground(WHITE);
@@ -200,18 +207,8 @@ int main()
         {
             if (searcher->isValidRect(iter.getKey()))
             {
-                searcher->generateRect(iter.getKey(), &rect);
-                DrawRectangle(rect.x, rect.y, rect.width, rect.height, COLORS[iter.getValue()]);
-            }
-        }
-
-        // draw the current cell with red
-        if (!searcher->isPathFound() && searcher->isRunning())
-        {
-            if (searcher->isValidRect(searcher->getCurrentPos()))
-            {
-                searcher->generateRect(searcher->getCurrentPos(), &rect);
-                DrawRectangle(rect.x, rect.y, rect.width, rect.height, RED);
+                searcher->generateRect(iter.getKey(), &rect, &iter.getValue());
+                DrawRectangle(rect.x, rect.y, rect.width, rect.height, COLORS[iter.getValue().ct]);
             }
         }
 
