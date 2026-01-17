@@ -8,7 +8,7 @@
 #define HOVER 1
 #define PRESSED 2
 
-#define FONT_SIZE 30
+#define FONT_SIZE 30.0
 #define FONT_SPACING 1
 
 class Button
@@ -18,7 +18,7 @@ private:
     const char* text; 
     Color color;
     int state;
-    int fontSize;
+    float fontSize;
 
     bool isUnderMouse(Vector2 mouse)
     {
@@ -58,7 +58,7 @@ public:
     {
         this->fontSize = FONT_SIZE;
     }
-    Button(Rectangle rect, const char* text, Color color, int fontSize = FONT_SIZE)
+    Button(Rectangle rect, const char* text, Color color, float fontSize = FONT_SIZE)
     {
         this->rect = rect;
         this->text = text;
@@ -106,7 +106,7 @@ public:
         t = text;
     }
 
-    void setFontSize(int fontSize)
+    void setFontSize(float fontSize)
     {
         this->fontSize = fontSize;
     }

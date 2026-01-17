@@ -5,13 +5,16 @@
 #include "./searchers.hpp"
 #include "./controls.hpp"
 
+#define STANDARD_WIDTH 3072.0f
+#define STANDARD_HEIGHT 1728.0f
 #define FRAMES 60.0f
-#define BUTTON_WIDTH 200
-#define BUTTON_HEIGHT 60
 #define SCREEN_PARTS 10.0f
-#define MENU_GAP 10.0f
 #define CONTROL_BUTTONS_NUMBER 7
 #define ALGORITHM_BUTTONS_NUMBER 3
+#define FONT_SIZE_RATIO FONT_SIZE / STANDARD_WIDTH
+#define BUTTON_WIDTH_RATIO 200.0f / STANDARD_WIDTH
+#define BUTTON_HEIGHT_RATIO 60.0f / STANDARD_HEIGHT
+#define BUTTON_GAP_RATIO 10.0f / STANDARD_WIDTH
 
 #define CONTROLS_CONTROL 0
 #define START_CONTROL 1
@@ -25,7 +28,6 @@
 #define ALGORITHMS 0
 #define DIJKSTRA 1
 #define ASTAR 2
-
 
 float screenWidth = 0;
 float screenHeight = 0;
@@ -115,34 +117,53 @@ void updateButtons(Vector2 mouse, bool isPressed)
 
 void initButtons()
 {
+
+    float buttonWidth = BUTTON_WIDTH_RATIO * screenWidth;
+    float buttonHeight = BUTTON_HEIGHT_RATIO * screenHeight;
+
+    float buttonGap = BUTTON_GAP_RATIO * screenHeight;
+
+    
+    float fontSize = FONT_SIZE_RATIO * screenWidth;
     currentControl = WALL_CONTROL;
     currentAlgorithm = DIJKSTRA;
+
+    std::cout << "Screen width: " << screenWidth << std::endl;
+    std::cout << "Screen height: " << screenHeight << std::endl;
+
+    std::cout << std::endl;
+
+    std::cout << "Font size: " << fontSize << std::endl;
+    std::cout << "Button width: " << buttonWidth << std::endl;
+    std::cout << "Button height: " << buttonHeight << std::endl;
 
     // control buttons initialization
     for (int i = 0; i < CONTROL_BUTTONS_NUMBER; i += 1)
     {
         Rectangle rect = {
-            .x = i * (BUTTON_WIDTH + MENU_GAP) + MENU_GAP,
-            .y = MENU_GAP,
-            .width = BUTTON_WIDTH,
-            .height = BUTTON_HEIGHT
+            .x = i * (buttonWidth + buttonGap) + buttonGap,
+            .y = buttonGap,
+            .width = buttonWidth,
+            .height = buttonHeight
         };
         controlButtons[i].setColor(controlButtonsColor[i]);
         controlButtons[i].setText(controlButtonsText[i]);
         controlButtons[i].setRect(rect);
+        controlButtons[i].setFontSize(fontSize);
     }
 
     for (int i = 0; i < ALGORITHM_BUTTONS_NUMBER; i += 1)
     {
         Rectangle rect = {
-            .x = i * (BUTTON_WIDTH + MENU_GAP) + MENU_GAP,
-            .y = 2 * MENU_GAP + BUTTON_HEIGHT,
-            .width = BUTTON_WIDTH,
-            .height = BUTTON_HEIGHT
+            .x = i * (buttonWidth + buttonGap) + buttonGap,
+            .y = 2 * buttonGap + buttonHeight,
+            .width = buttonWidth,
+            .height = buttonHeight
         };
         algorithmButtons[i].setColor(algorithmButtonsColor[i]);
         algorithmButtons[i].setText(algorithmButtonsText[i]);
         algorithmButtons[i].setRect(rect);
+        algorithmButtons[i].setFontSize(fontSize);
     }
 
 }

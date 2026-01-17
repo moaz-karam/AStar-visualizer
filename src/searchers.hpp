@@ -193,6 +193,9 @@ protected:
 
     virtual bool putToGrid(Vector2I key, CellType ct, bool reset)
     {
+
+        bool isAnimated = !reset && (ct == CHECKED || ct == PATH);
+
         if (!isValidCell(key)) return false;
 
         if (running)
@@ -221,18 +224,18 @@ protected:
             if (grid.table.containsKey(sourcePos)) grid.table.remove(sourcePos);
 
             sourcePos = key;
-            grid.table.insert(sourcePos, {ct, clock() * !reset});
+            grid.table.insert(sourcePos, {ct, clock() * isAnimated});
             return false;
         }
         else if (ct == TARGET)
         {
             if (grid.table.containsKey(targetPos)) grid.table.remove(targetPos);
             targetPos = key;
-            grid.table.insert(targetPos, {ct, clock() * !reset});
+            grid.table.insert(targetPos, {ct, clock() * isAnimated});
             return false;
         }
 
-        grid.table.insert(key, {ct, clock() * !reset});
+        grid.table.insert(key, {ct, clock() * isAnimated});
         return true;
     }
 
