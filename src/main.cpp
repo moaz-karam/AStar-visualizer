@@ -128,14 +128,6 @@ void initButtons()
     currentControl = WALL_CONTROL;
     currentAlgorithm = DIJKSTRA;
 
-    std::cout << "Screen width: " << screenWidth << std::endl;
-    std::cout << "Screen height: " << screenHeight << std::endl;
-
-    std::cout << std::endl;
-
-    std::cout << "Font size: " << fontSize << std::endl;
-    std::cout << "Button width: " << buttonWidth << std::endl;
-    std::cout << "Button height: " << buttonHeight << std::endl;
 
     // control buttons initialization
     for (int i = 0; i < CONTROL_BUTTONS_NUMBER; i += 1)
