@@ -44,6 +44,11 @@ private:
         ArrayList<HashNode>* temp = arrays;
         arrays = new ArrayList<HashNode>[length];
 
+
+        if (arrays == nullptr) {
+            throw std::runtime_error("the hashtable can not be expanded");
+        }
+        
         size = 0;
 
         for (int i = 0; i < length / factor; i += 1)
@@ -183,6 +188,14 @@ public:
         
         int counter;
     public:
+
+        HashIterator()
+        {
+            ht = nullptr;
+            index1 = 0;
+            index2 = -1;
+            counter = 0;
+        }
         void begin(Hashtable<K, V>& htable)
         {
             ht = &htable;
@@ -197,10 +210,10 @@ public:
         {
             if (counter > ht->size)
             {
-                throw std::runtime_error("The iterator has not next value");
+                throw std::runtime_error("The iterator has no next value");
             }
 
-            while (index2 + 1 >= ht->arrays[index1].getSize())
+            while (index1 < ht->length && index2 + 1 >= ht->arrays[index1].getSize())
             {
                 index2 = -1;
                 index1 += 1;

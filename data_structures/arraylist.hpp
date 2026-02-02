@@ -2,12 +2,13 @@
 #define ARRAY_LIST_H
 
 #include <iostream>
+#include <stdexcept>
 
 template <typename T>
 class ArrayList
 {
 private:
-    T* items;
+    T* items = nullptr;
     int size;
     int length;
    
@@ -17,6 +18,10 @@ private:
         T* temp = items;
 
         items = new T[length];
+
+        if (items == nullptr) {
+            throw std::runtime_error("arraylist can not be expanded ");
+        }
 
         for (int i = 0; i < size; i += 1)
         {

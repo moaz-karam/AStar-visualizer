@@ -8,9 +8,10 @@
 #include "../data_structures/hashtable.hpp"
 #include "../data_structures/heap.hpp"
 
-#define MIN_CELL_DIMENSION 20.0f
-#define ITERATIONS_PER_UPDATE 5
+#define MIN_CELL_DIMENSION 30.0f
+#define ITERATIONS_PER_UPDATE 50
 #define CELL_TIME_SECONDS 0.2f
+#define CELLS_NUMBERS 200.0f
 
 enum CellType
 {
@@ -134,15 +135,18 @@ protected:
 
     virtual void applyDiffConstraints()
     {
+        const float maxX = CELLS_NUMBERS * MIN_CELL_DIMENSION;
+        const float maxY = CELLS_NUMBERS * MIN_CELL_DIMENSION;
+
         if (xDiff > 0) xDiff = 0;
-        else if (-xDiff * MIN_CELL_DIMENSION / grid.cellDimension + grid.cellsNumber.x * MIN_CELL_DIMENSION > grid.dimensions.x)
+        else if (-xDiff * MIN_CELL_DIMENSION / grid.cellDimension + grid.cellsNumber.x * MIN_CELL_DIMENSION > maxX)
         {
-            xDiff = -(grid.dimensions.x - grid.cellsNumber.x * MIN_CELL_DIMENSION) * grid.cellDimension / MIN_CELL_DIMENSION;
+            xDiff = -(maxX - grid.cellsNumber.x * MIN_CELL_DIMENSION) * grid.cellDimension / MIN_CELL_DIMENSION;
         }
         if (yDiff > 0) yDiff = 0;
-        else if (-yDiff * MIN_CELL_DIMENSION / grid.cellDimension + grid.cellsNumber.y * MIN_CELL_DIMENSION > grid.dimensions.y)
+        else if (-yDiff * MIN_CELL_DIMENSION / grid.cellDimension + grid.cellsNumber.y * MIN_CELL_DIMENSION > maxY)
         {
-            yDiff = -(grid.dimensions.y - grid.cellsNumber.y * MIN_CELL_DIMENSION) * grid.cellDimension / MIN_CELL_DIMENSION;
+            yDiff = -(maxY - grid.cellsNumber.y * MIN_CELL_DIMENSION) * grid.cellDimension / MIN_CELL_DIMENSION;
         }
     }
 
@@ -171,11 +175,11 @@ protected:
 
     virtual bool isValidCell(Vector2I cell)
     {
-        int maxX = grid.dimensions.x / MIN_CELL_DIMENSION;
-        int maxY = grid.dimensions.y / MIN_CELL_DIMENSION;
+        const float maxX = grid.dimensions.x / MIN_CELL_DIMENSION;
+        const float maxY = grid.dimensions.y / MIN_CELL_DIMENSION;
 
         return cell.x >= 0 && cell.y >= 0 &&
-                cell.x <= maxX && cell.y <= maxY;
+                cell.x < CELLS_NUMBERS && cell.y < CELLS_NUMBERS;
     }
 
     virtual void resetSearch()
