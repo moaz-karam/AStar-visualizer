@@ -215,9 +215,10 @@ int main()
         searcher->update(iter);
 
         Rectangle rect;
-        // draw the cells with the help of the iterator
-        for (iter; iter.hasNext(); iter.next())
+        
+        while (iter.hasNext())
         {
+            iter.next();
             if (searcher->isValidRect(iter.getKey()))
             {
                 searcher->generateRect(iter.getKey(), &rect, &iter.getValue());

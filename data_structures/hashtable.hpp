@@ -202,8 +202,6 @@ public:
             index1 = 0;
             index2 = -1;
             counter = 0;
-
-            next();
         }
 
         void next()
@@ -213,7 +211,7 @@ public:
                 throw std::runtime_error("The iterator has no next value");
             }
 
-            while (index1 < ht->length && index2 + 1 >= ht->arrays[index1].getSize())
+            while (index2 + 1 >= ht->arrays[index1].getSize())
             {
                 index2 = -1;
                 index1 += 1;
@@ -224,7 +222,7 @@ public:
 
         bool hasNext()
         {
-            return counter <= ht->size;
+            return counter < ht->size;
         }
 
         V& getValue()

@@ -8,10 +8,10 @@
 #include "../data_structures/hashtable.hpp"
 #include "../data_structures/heap.hpp"
 
-#define MIN_CELL_DIMENSION 30.0f
-#define ITERATIONS_PER_UPDATE 50
+#define MIN_CELL_DIMENSION 20.0f
+#define ITERATIONS_PER_UPDATE 100
 #define CELL_TIME_SECONDS 0.2f
-#define CELLS_NUMBERS 200.0f
+#define CELLS_NUMBERS 400.0f
 
 enum CellType
 {
