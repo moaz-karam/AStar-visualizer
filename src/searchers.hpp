@@ -187,8 +187,9 @@ protected:
         ArrayList<Vector2I> walls;
         Hashtable<Vector2I, Cell>::HashIterator iter;
         iter.begin(grid.table);
-        for (iter; iter.hasNext(); iter.next())
+        while(iter.hasNext())
         {
+            iter.next();
             if (iter.getValue().ct == WALL) walls.push(iter.getKey());
         }
         clear();
@@ -308,8 +309,9 @@ public:
         Hashtable<Vector2I, Cell>::HashIterator iter;
         iter.begin(otherSearcher->grid.table);
 
-        for (iter; iter.hasNext(); iter.next())
+        while(iter.hasNext())
         {
+            iter.next();
             if (iter.getValue().ct == WALL)
             {
                 putToGrid(iter.getKey(), WALL, true);
