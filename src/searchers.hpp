@@ -267,14 +267,18 @@ public:
 
         pathFound = false;
 
-        sourcePos = Vector2I{.x = -1000,.y = -1000};
-        targetPos = Vector2I{.x = -1000,.y = -1000};
+        const int diffCellsX = (CELLS_NUMBERS - grid.cellsNumber.x) / 2;
+        const int diffCellsY = (CELLS_NUMBERS - grid.cellsNumber.y) / 2;
 
-        putToGrid((Vector2I){.x = (int)grid.cellsNumber.x / 3, .y = (int)grid.cellsNumber.y / 2}, TARGET, false);
-        putToGrid((Vector2I){.x = 2 * (int)grid.cellsNumber.x / 3, .y = (int)grid.cellsNumber.y / 2}, SOURCE, false);
+        targetPos = Vector2I{.x = diffCellsX, .y = diffCellsY + (int)grid.cellsNumber.y / 2};
+        sourcePos = Vector2I{.x = diffCellsX + (int)grid.cellsNumber.x, .y = diffCellsY + (int)grid.cellsNumber.y / 2};
 
-        xDiff = 0;
-        yDiff = 0;
+        putToGrid(sourcePos, SOURCE, false);
+        putToGrid(targetPos, TARGET, false);
+
+        // move everything left and up
+        xDiff = -MIN_CELL_DIMENSION * diffCellsX;
+        yDiff = -MIN_CELL_DIMENSION * diffCellsY;
 
         dragging = false;
     }
