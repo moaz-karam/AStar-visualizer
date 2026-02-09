@@ -1,9 +1,14 @@
 #include <time.h>
-#include "../include/raylib.h"
-#include "../include/raygui.h"
+#include "../include/raylib/src/raylib.h"
 
 #include "./searchers.hpp"
 #include "./controls.hpp"
+
+#define PLATFORM_WEB
+
+// #if defined(PLATFORM_WEB)
+//     #include <emscripten/emscripten.h>
+// #endif
 
 #define STANDARD_WIDTH 3072.0f
 #define STANDARD_HEIGHT 1728.0f
@@ -29,8 +34,8 @@
 #define DIJKSTRA 1
 #define ASTAR 2
 
-float screenWidth = 0;
-float screenHeight = 0;
+float screenWidth = STANDARD_WIDTH;
+float screenHeight = STANDARD_HEIGHT;
 
 
 int searcherType = DIJKSTRA;
@@ -160,30 +165,26 @@ void initButtons()
 
 }
 
+void UpdateDrawFrame(void);
 int main()
 {
 
     InitWindow(screenWidth, screenHeight, "Visualizer");
-    ToggleFullscreen();
-    screenWidth = GetScreenWidth();
-    screenHeight = GetScreenHeight();
+    // ToggleFullscreen();
+
+    // screenWidth = GetScreenWidth();
+    // screenHeight = GetScreenHeight();
 
     searcher = new Dijkstra(Vector2{.x = 0, .y = screenHeight / (SCREEN_PARTS)},
          Vector2{.x = screenWidth, .y = (SCREEN_PARTS - 1) * screenHeight / (SCREEN_PARTS)});
 
     initButtons();
 
-    clock_t st = clock();
+    SetTargetFPS(60);
 
     // initializing buttons
     while (!WindowShouldClose())
     {
-        clock_t now = clock();
-        if ((float)(now - st) / CLOCKS_PER_SEC >= 1.0f / FRAMES)
-        {
-            st = now;
-            continue;
-        }
         BeginDrawing();
 
         ClearBackground(WHITE);
@@ -245,10 +246,23 @@ int main()
 
 
         EndDrawing();
+
+
     }
+
+    // #if defined(PLATFORM_WEB)
+
+    //     emscripten_set_main_loop(UpdateDrawFrame(), 0, 1);
+    // #endif
 
     delete searcher;
     CloseWindow();
 
     return 0;
+}
+
+
+void UpdateDrawFrame(void)
+{
+
 }

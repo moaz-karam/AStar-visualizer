@@ -4,14 +4,14 @@
 #include <math.h>
 #include <time.h>
 
-#include "../include/raylib.h"
+#include "../include/raylib/src/raylib.h"
 #include "../data_structures/hashtable.hpp"
 #include "../data_structures/heap.hpp"
 
-#define MIN_CELL_DIMENSION 20.0f
 #define ITERATIONS_PER_UPDATE 100
 #define CELL_TIME_SECONDS 0.2f
-#define CELLS_NUMBERS 400.0f
+#define CELLS_NUMBERS 300.0f
+
 
 enum CellType
 {
@@ -68,6 +68,7 @@ private:
 
 
 
+    float MIN_CELL_DIMENSION = 40;
 
     struct Grid
     {
@@ -175,9 +176,6 @@ protected:
 
     virtual bool isValidCell(Vector2I cell)
     {
-        const float maxX = grid.dimensions.x / MIN_CELL_DIMENSION;
-        const float maxY = grid.dimensions.y / MIN_CELL_DIMENSION;
-
         return cell.x >= 0 && cell.y >= 0 &&
                 cell.x < CELLS_NUMBERS && cell.y < CELLS_NUMBERS;
     }
@@ -252,6 +250,8 @@ public:
     {
         grid.startingPoint.x = startingPos.x;
         grid.startingPoint.y = startingPos.y;
+
+        MIN_CELL_DIMENSION = dimensions.x / CELLS_NUMBERS > MIN_CELL_DIMENSION ? dimensions.x / CELLS_NUMBERS : MIN_CELL_DIMENSION;
 
         grid.cellDimension = MIN_CELL_DIMENSION;
 

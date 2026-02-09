@@ -1,8 +1,7 @@
 #ifndef CONTROLS_H
 #define CONTROLS_H
 
-#include "../include/raylib.h"
-#include "../include/raygui.h"
+#include "../include/raylib/src/raylib.h"
 
 #define NORMAL 0
 #define HOVER 1
