@@ -10,7 +10,7 @@
 
 #define ITERATIONS_PER_UPDATE 100
 #define CELL_TIME_SECONDS 0.2f
-#define CELLS_NUMBERS 300.0f
+#define CELLS_NUMBERS 400.0f
 
 
 enum CellType
@@ -68,7 +68,7 @@ private:
 
 
 
-    float MIN_CELL_DIMENSION = 40;
+    float MIN_CELL_DIMENSION = 10;
 
     struct Grid
     {
@@ -82,6 +82,7 @@ private:
     bool running;
     CellType selectedType;
     Grid grid;
+    Vector2 mouse;
 
 protected:
     Vector2I sourcePos;
@@ -120,11 +121,11 @@ protected:
         return v;
     }
 
-    bool isMouseInGrid(Vector2 mouse)
+    bool isMouseInGrid(Vector2 newMouse)
     {
-        return mouse.x > grid.startingPoint.x && mouse.y > grid.startingPoint.y
-            && mouse.x < grid.startingPoint.x + grid.dimensions.x
-            && mouse.y < grid.startingPoint.y + grid.dimensions.y;
+        return newMouse.x > grid.startingPoint.x && newMouse.y > grid.startingPoint.y
+            && newMouse.x < grid.startingPoint.x + grid.dimensions.x
+            && newMouse.y < grid.startingPoint.y + grid.dimensions.y;
     }
 
     virtual void addEdgeFrom(Vector2I vertex, Vector2I fromVertex)
@@ -360,11 +361,26 @@ public:
         dragging = false;
     }
 
-    virtual void press(Vector2 mouse)
+    virtual void press(Vector2 newMouse, bool isLeftPressed)
     {
-        if (running || !isMouseInGrid(mouse)) {return;}
-        Vector2I pos = getGridCoordinates(mouse);
-        putToGrid(pos, selectedType, false);
+        if (!isLeftPressed || running || !isMouseInGrid(newMouse)) {
+            this->mouse = Vector2{.x = -1, .y = -1};
+            return;
+        }
+        Vector2I newCell = getGridCoordinates(newMouse);
+        Vector2I lastCell = mouse.x > -1 && mouse.y > -1 ? getGridCoordinates(this->mouse) : newCell;
+
+        int xCellDiff = newCell.x - lastCell.x;
+        int yCellDiff = newCell.y - lastCell.y;
+        float slope = atan2(yCellDiff, xCellDiff);
+        float diffLength = sqrt(pow(xCellDiff, 2) + pow(yCellDiff, 2));
+
+        for (int i = 0; i <= diffLength; i += 1)
+        {
+            Vector2I tempCell = Vector2I{.x = (int)(lastCell.x + i * cos(slope)), .y = (int)(lastCell.y + i * sin(slope))};
+            putToGrid(tempCell, selectedType, false);
+        }
+        mouse = newMouse;
     }
 
     virtual void drag(float x, float y)

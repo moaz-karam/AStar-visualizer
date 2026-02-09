@@ -4,7 +4,7 @@
 #include "./searchers.hpp"
 #include "./controls.hpp"
 
-#define PLATFORM_WEB
+// #define PLATFORM_WEB
 
 // #if defined(PLATFORM_WEB)
 //     #include <emscripten/emscripten.h>
@@ -195,17 +195,13 @@ int main()
 
         // managing buttons
         Vector2 mouse = GetMousePosition();
-        bool isPressed = IsMouseButtonDown(MOUSE_LEFT_BUTTON);
-        updateButtons(mouse, isPressed);
-
-
+        bool isLeftPressed = IsMouseButtonDown(MOUSE_LEFT_BUTTON);
+        updateButtons(mouse, isLeftPressed);
 
         // add particles if mouse is pressed
-        if (IsMouseButtonDown(MOUSE_LEFT_BUTTON))
-        {
-            searcher->press(GetMousePosition());
-        }
-        else if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON))
+        searcher->press(GetMousePosition(), isLeftPressed);
+
+        if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON))
         {
             Vector2 diff = GetMouseDelta();
             searcher->drag(diff.x, diff.y);
