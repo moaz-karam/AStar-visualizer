@@ -1,4 +1,3 @@
-#include <time.h>
 #include "../include/raylib/src/raylib.h"
 
 #include "./searchers.hpp"
