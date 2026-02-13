@@ -205,7 +205,7 @@ int main()
             Vector2 diff = GetMouseDelta();
             searcher->drag(diff.x, diff.y);
         }
-        searcher->zoom((int)GetMouseWheelMove());
+        searcher->zoom(mouse, (int)GetMouseWheelMove());
 
         // update the searcher and start the iterator
         searcher->update(iter);

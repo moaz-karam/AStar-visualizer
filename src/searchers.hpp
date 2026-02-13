@@ -491,12 +491,25 @@ public:
         applyDiffConstraints();
     }
 
-    virtual void zoom(float n)
+    virtual void zoom(Vector2 mouse, float n)
     {
-        grid.cellDimension = std::max(n + grid.cellDimension, MIN_CELL_DIMENSION);
+        if (abs(n) == 0) return;
+
+        Vector2I mouseCell = getGridCoordinates(mouse);
+        
+        float oldCellDimension = grid.cellDimension;
+        grid.cellDimension = std::max(2 * n + grid.cellDimension, MIN_CELL_DIMENSION);
+
+        float sizeChange = grid.cellDimension - oldCellDimension;
+
+        float xDirect = -sizeChange * mouseCell.x;
+        float yDirect = -sizeChange * mouseCell.y;
 
         grid.cellsNumber.x = grid.dimensions.x / grid.cellDimension;
         grid.cellsNumber.y = grid.dimensions.y / grid.cellDimension;
+
+        drag(xDirect, yDirect);
+
         applyDiffConstraints();
     }
 
