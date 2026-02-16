@@ -78,7 +78,7 @@ void updateButtons(Vector2 mouse, bool isPressed)
     algorithmButtons[ALGORITHMS].updateState(mouse, false, false);
 
     // drawing buttons
-    if (controlButtons[START_CONTROL].updateState(mouse, isPressed, currentControl == START_CONTROL))
+    if (controlButtons[START_CONTROL].updateState(mouse, isPressed, searcher->isRunning() == START_CONTROL))
     {
         searcher->run();
         currentControl = START_CONTROL;
@@ -169,10 +169,10 @@ int main()
 {
 
     InitWindow(screenWidth, screenHeight, "Visualizer");
-    // ToggleFullscreen();
+    ToggleFullscreen();
 
-    // screenWidth = GetScreenWidth();
-    // screenHeight = GetScreenHeight();
+    screenWidth = GetScreenWidth();
+    screenHeight = GetScreenHeight();
 
     searcher = new Dijkstra(Vector2{.x = 0, .y = screenHeight / (SCREEN_PARTS)},
          Vector2{.x = screenWidth, .y = (SCREEN_PARTS - 1) * screenHeight / (SCREEN_PARTS)});
@@ -230,13 +230,13 @@ int main()
         for (int col = 1; searcher->isColumn(col); col += 1)
         {
             searcher->getColumn(col, &sPoint, &ePoint);
-            DrawLine(sPoint.x, sPoint.y, ePoint.x, ePoint.y, lineColor);
+            DrawLineV(sPoint, ePoint, lineColor);
         }
 
         for (int row = 1; searcher->isRow(row); row += 1)
         {
             searcher->getRow(row, &sPoint, &ePoint);
-            DrawLine(sPoint.x, sPoint.y, ePoint.x, ePoint.y, lineColor);
+            DrawLineV(sPoint, ePoint, lineColor);
         }
 
 

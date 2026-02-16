@@ -493,7 +493,7 @@ public:
 
     virtual void zoom(Vector2 mouse, float n)
     {
-        if (abs(n) == 0) return;
+        if (abs(n) == 0 || !isMouseInGrid(mouse)) return;
 
         Vector2I mouseCell = getGridCoordinates(mouse);
         
@@ -677,7 +677,7 @@ private:
         float dy = vertex.y - targetPos.y;
         float d = sqrt(pow(dx, 2) + pow(dy, 2));
 
-        heap.add(vertex, distTo.get(vertex) + d);
+        heap.add(vertex, distTo.get(vertex) * 0.75 + d);
     }
 public:
     AStar(Vector2 startingPos, Vector2 dimensions):Searcher(startingPos, dimensions)
