@@ -3,11 +3,10 @@
 #include "./searchers.hpp"
 #include "./controls.hpp"
 
-// #define PLATFORM_WEB
 
-// #if defined(PLATFORM_WEB)
-//     #include <emscripten/emscripten.h>
-// #endif
+#if defined(PLATFORM_WEB)
+    #include <emscripten/emscripten.h>
+#endif
 
 #define STANDARD_WIDTH 3072.0f
 #define STANDARD_HEIGHT 1728.0f
@@ -16,7 +15,7 @@
 #define CONTROL_BUTTONS_NUMBER 7
 #define ALGORITHM_BUTTONS_NUMBER 3
 #define FONT_SIZE_RATIO FONT_SIZE / STANDARD_WIDTH
-#define BUTTON_WIDTH_RATIO 200.0f / STANDARD_WIDTH
+#define BUTTON_WIDTH_RATIO 230.0f / STANDARD_WIDTH
 #define BUTTON_HEIGHT_RATIO 60.0f / STANDARD_HEIGHT
 #define BUTTON_GAP_RATIO 10.0f / STANDARD_WIDTH
 
@@ -37,20 +36,20 @@ float screenWidth = STANDARD_WIDTH;
 float screenHeight = STANDARD_HEIGHT;
 
 
-int searcherType = DIJKSTRA;
-Searcher* searcher;
-Hashtable<Vector2I, Cell>::HashIterator iter;
+static int searcherType = DIJKSTRA;
+static Searcher* searcher;
+static Hashtable<Vector2I, Cell>::HashIterator iter;
 
 Button controlButtons[CONTROL_BUTTONS_NUMBER];
-const char* controlButtonsText[] = {"CONTROLS: ", "START", "CLEAR", "SOURCE", "TARGET", "WALL", "REMOVE"};
-const Color controlButtonsColor[] = {WHITE, GREEN, LIGHTGRAY, ORANGE, DARKBLUE, BROWN, RED};
+static const char* controlButtonsText[] = {"CONTROLS: ", "START", "CLEAR", "SOURCE", "TARGET", "WALL", "REMOVE"};
+static const Color controlButtonsColor[] = {WHITE, GREEN, LIGHTGRAY, SOURCE_COLOR, TARGET_COLOR, WALL_COLOR, RED};
 
-Button algorithmButtons[ALGORITHM_BUTTONS_NUMBER];
-const char* algorithmButtonsText[] = {"ALGORITHMS: ", "DIJKSTRA", "ASTAR"};
-const Color algorithmButtonsColor[] = {WHITE, PURPLE, YELLOW};
+static Button algorithmButtons[ALGORITHM_BUTTONS_NUMBER];
+static const char* algorithmButtonsText[] = {"ALGORITHMS: ", "DIJKSTRA", "ASTAR"};
+static const Color algorithmButtonsColor[] = {WHITE, PURPLE, YELLOW};
 
-int currentControl;
-int currentAlgorithm;
+static int currentControl;
+static int currentAlgorithm;
 
 void selectSearcherType(int type)
 {
@@ -78,7 +77,7 @@ void updateButtons(Vector2 mouse, bool isPressed)
     algorithmButtons[ALGORITHMS].updateState(mouse, false, false);
 
     // drawing buttons
-    if (controlButtons[START_CONTROL].updateState(mouse, isPressed, searcher->isRunning() == START_CONTROL))
+    if (controlButtons[START_CONTROL].updateState(mouse, isPressed, searcher->isRunning() && !searcher->isPathFound() == START_CONTROL))
     {
         searcher->run();
         currentControl = START_CONTROL;
@@ -164,15 +163,77 @@ void initButtons()
 
 }
 
-void UpdateDrawFrame(void);
+
+// main loop variables
+static Vector2 mouse;
+static bool isLeftPressed;
+static Vector2 diff;
+static Rectangle rect;
+static Vector2 sPoint;
+static Vector2 ePoint;
+static const Color lineColor = ColorAlpha(BLACK, 0.2);
+
+void mainLoop(void)
+{
+    BeginDrawing();
+    ClearBackground(WHITE);
+
+    DrawRectangle(0, screenHeight / SCREEN_PARTS, screenWidth, (SCREEN_PARTS - 1) * screenHeight / (SCREEN_PARTS), LIGHTGRAY);
+
+
+    // managing buttons
+    mouse = GetMousePosition();
+    isLeftPressed = IsMouseButtonDown(MOUSE_LEFT_BUTTON);
+    updateButtons(mouse, isLeftPressed);
+
+    // add particles if mouse is pressed
+    searcher->press(GetMousePosition(), isLeftPressed);
+
+    if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON))
+    {
+        diff = GetMouseDelta();
+        searcher->drag(diff.x, diff.y);
+    }
+    searcher->zoom(mouse, (int)GetMouseWheelMove());
+
+    // update the searcher and start the iterator
+    searcher->update(iter);
+
+
+    while (iter.hasNext())
+    {
+        iter.next();
+        if (searcher->isValidRect(iter.getKey()))
+        {
+            searcher->generateRect(iter.getKey(), &rect, &iter.getValue());
+            DrawRectangle(rect.x, rect.y, rect.width, rect.height, COLORS[iter.getValue().ct]);
+        }
+    }
+
+    for (int col = 1; searcher->isColumn(col); col += 1)
+    {
+        searcher->getColumn(col, &sPoint, &ePoint);
+        DrawLineV(sPoint, ePoint, lineColor);
+    }
+
+    for (int row = 1; searcher->isRow(row); row += 1)
+    {
+        searcher->getRow(row, &sPoint, &ePoint);
+        DrawLineV(sPoint, ePoint, lineColor);
+    }
+
+    EndDrawing();
+}
+
 int main()
 {
-
     InitWindow(screenWidth, screenHeight, "Visualizer");
-    ToggleFullscreen();
-
-    screenWidth = GetScreenWidth();
-    screenHeight = GetScreenHeight();
+    
+    #ifndef PLATFORM_WEB
+        ToggleFullscreen();
+        screenWidth = GetScreenWidth();
+        screenHeight = GetScreenHeight();
+    #endif
 
     searcher = new Dijkstra(Vector2{.x = 0, .y = screenHeight / (SCREEN_PARTS)},
          Vector2{.x = screenWidth, .y = (SCREEN_PARTS - 1) * screenHeight / (SCREEN_PARTS)});
@@ -181,83 +242,17 @@ int main()
 
     SetTargetFPS(60);
 
-    // initializing buttons
-    while (!WindowShouldClose())
-    {
-        BeginDrawing();
-
-        ClearBackground(WHITE);
-
-
-        DrawRectangle(0, screenHeight / SCREEN_PARTS, screenWidth, (SCREEN_PARTS - 1) * screenHeight / (SCREEN_PARTS), LIGHTGRAY);
-
-
-        // managing buttons
-        Vector2 mouse = GetMousePosition();
-        bool isLeftPressed = IsMouseButtonDown(MOUSE_LEFT_BUTTON);
-        updateButtons(mouse, isLeftPressed);
-
-        // add particles if mouse is pressed
-        searcher->press(GetMousePosition(), isLeftPressed);
-
-        if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON))
+    #if defined(PLATFORM_WEB)
+        emscripten_set_main_loop(mainLoop, 0, 1);
+    #else
+        while (!WindowShouldClose())
         {
-            Vector2 diff = GetMouseDelta();
-            searcher->drag(diff.x, diff.y);
+            mainLoop();
         }
-        searcher->zoom(mouse, (int)GetMouseWheelMove());
-
-        // update the searcher and start the iterator
-        searcher->update(iter);
-
-        Rectangle rect;
-        
-        while (iter.hasNext())
-        {
-            iter.next();
-            if (searcher->isValidRect(iter.getKey()))
-            {
-                searcher->generateRect(iter.getKey(), &rect, &iter.getValue());
-                DrawRectangle(rect.x, rect.y, rect.width, rect.height, COLORS[iter.getValue().ct]);
-            }
-        }
-
-        Vector2 sPoint;
-        Vector2 ePoint;
-
-        Color lineColor = ColorAlpha(BLACK, 0.2);
-
-        for (int col = 1; searcher->isColumn(col); col += 1)
-        {
-            searcher->getColumn(col, &sPoint, &ePoint);
-            DrawLineV(sPoint, ePoint, lineColor);
-        }
-
-        for (int row = 1; searcher->isRow(row); row += 1)
-        {
-            searcher->getRow(row, &sPoint, &ePoint);
-            DrawLineV(sPoint, ePoint, lineColor);
-        }
-
-
-        EndDrawing();
-
-
-    }
-
-    // #if defined(PLATFORM_WEB)
-
-    //     emscripten_set_main_loop(UpdateDrawFrame(), 0, 1);
-    // #endif
+    #endif
 
     delete searcher;
     CloseWindow();
 
     return 0;
-}
-
-
-void UpdateDrawFrame(void)
-{
-
 }

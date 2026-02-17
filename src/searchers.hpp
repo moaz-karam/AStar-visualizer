@@ -10,23 +10,27 @@
 #include "../data_structures/heap.hpp"
 
 #define MIN_CELL_DIMENSION 20.0f
-#define ITERATIONS_PER_UPDATE 500
+#define ITERATIONS_PER_UPDATE 20
 #define SIZE_ANIMATION_TIME 0.2f
-#define LINEAR_ANIMATION_TIME 0.08f
+#define LINEAR_ANIMATION_TIME 0.5f
 #define CELLS_NUMBERS 400.0f
 
+
+#define SOURCE_COLOR GetColor((int)0xFF6F00FF)
+#define TARGET_COLOR DARKBLUE
+#define WALL_COLOR BROWN
 
 enum CellType
 {
     CHECKED = 0, WALL = 1, PATH = 2, SOURCE = 3, TARGET = 4, REMOVE, 
 };
 
-const Color COLORS[] = {SKYBLUE, BROWN, YELLOW, ORANGE, DARKBLUE,};
+const Color COLORS[] = {SKYBLUE, WALL_COLOR, YELLOW, SOURCE_COLOR, TARGET_COLOR,};
 
 struct Cell
 {
     CellType ct;
-    clock_t st;
+    double st;
 };
 
 struct Vector2I
@@ -122,10 +126,6 @@ protected:
     float xDiff;
     float yDiff;
     
-    bool dragging;
-
-
-
     // helper methods
     // ---------------------------------------------------------------------------------------------------------
 
@@ -212,10 +212,10 @@ protected:
         for (int i = 0; i < walls.getSize(); i += 1) putToGrid(walls.get(i), WALL, 0);
     }
 
-    virtual Vector2 getAnimationPos(CellType ct, clock_t now, clock_t st)
+    virtual Vector2 getAnimationPos(CellType ct, double now, double st)
     {
         Vector2 pos;
-        float timeDiff = (float)(now - st) / CLOCKS_PER_SEC;
+        double timeDiff = now - st;
         if (ct == SOURCE)
         {
             if (timeDiff > LINEAR_ANIMATION_TIME)
@@ -247,9 +247,9 @@ protected:
 
     virtual void handleAnimation(Vector2I pos, Rectangle* rect, Cell* cell)
     {
-        clock_t now = clock();
+        double now = GetTime();
 
-        float timeDiff = (float)(now - cell->st) / CLOCKS_PER_SEC;
+        double timeDiff = now - cell->st;
 
         Vector2 cellPos = {.x = (float)pos.x, .y = (float)pos.y};
         if (cell->ct == SOURCE)
@@ -271,7 +271,7 @@ protected:
         rect->y = cellPos.y * grid.cellDimension + grid.startingPoint.y + yDiff + center;
     }
 
-    virtual bool putToGrid(Vector2I key, CellType ct, clock_t time)
+    virtual bool putToGrid(Vector2I key, CellType ct, double time)
     {
         if (!isValidCell(key)) return false;
 
@@ -300,7 +300,7 @@ protected:
         {
             if (grid.table.containsKey(sourcePos))
             {
-                sourceAnimation.lastPos = getAnimationPos(SOURCE, clock(), grid.table.get(sourcePos).st);
+                sourceAnimation.lastPos = getAnimationPos(SOURCE, GetTime(), grid.table.get(sourcePos).st);
 
                 int sourceYDiff = key.y - sourceAnimation.lastPos.y;
                 int sourceXDiff = key.x - sourceAnimation.lastPos.x;
@@ -318,7 +318,7 @@ protected:
         {
             if (grid.table.containsKey(targetPos))
             {
-                targetAnimation.lastPos = getAnimationPos(TARGET, clock(), grid.table.get(targetPos).st);
+                targetAnimation.lastPos = getAnimationPos(TARGET, GetTime(), grid.table.get(targetPos).st);
 
                 int targetYDiff = key.y - targetAnimation.lastPos.y;
                 int targetXDiff = key.x - targetAnimation.lastPos.x;
@@ -364,8 +364,8 @@ public:
         const int diffCellsX = (CELLS_NUMBERS - grid.cellsNumber.x) / 2;
         const int diffCellsY = (CELLS_NUMBERS - grid.cellsNumber.y) / 2;
 
-        targetPos = Vector2I{.x = diffCellsX, .y = diffCellsY + (int)grid.cellsNumber.y / 2};
-        sourcePos = Vector2I{.x = diffCellsX + (int)grid.cellsNumber.x, .y = diffCellsY + (int)grid.cellsNumber.y / 2};
+        targetPos = Vector2I{.x = diffCellsX + (int)grid.cellsNumber.x / 5, .y = diffCellsY + (int)grid.cellsNumber.y / 2};
+        sourcePos = Vector2I{.x = diffCellsX + 4 * (int)grid.cellsNumber.x / 5, .y = diffCellsY + (int)grid.cellsNumber.y / 2};
 
         targetAnimation.lastPos = (Vector2){.x = (float)targetPos.x, .y = (float)targetPos.y};
         sourceAnimation.lastPos = (Vector2){.x = (float)sourcePos.x, .y = (float)sourcePos.y};
@@ -376,8 +376,6 @@ public:
         // move everything left and up
         xDiff = -MIN_CELL_DIMENSION * diffCellsX;
         yDiff = -MIN_CELL_DIMENSION * diffCellsY;
-
-        dragging = false;
 
     }
 
@@ -421,7 +419,6 @@ public:
         }
 
         pathFound = false;
-        dragging = false;
         this->sourceAnimation = otherSearcher->sourceAnimation;
         this->targetAnimation = otherSearcher->targetAnimation;
     }
@@ -450,8 +447,8 @@ public:
         distTo.clear();
         from.clear();
 
-        clock_t sourceTime = grid.table.get(sourcePos).st;
-        clock_t targetTime = grid.table.get(targetPos).st;
+        double sourceTime = grid.table.get(sourcePos).st;
+        double targetTime = grid.table.get(targetPos).st;
 
         grid.table.clear();
         putToGrid(sourcePos, SOURCE, sourceTime);
@@ -459,7 +456,6 @@ public:
 
         running = false;
         pathFound = false;
-        dragging = false;
     }
 
     virtual void press(Vector2 newMouse, bool isLeftPressed)
@@ -479,7 +475,7 @@ public:
         for (int i = 0; i <= diffLength; i += 1)
         {
             Vector2I tempCell = Vector2I{.x = (int)(lastInsertedCell.x + i * cos(slope)), .y = (int)(lastInsertedCell.y + i * sin(slope))};
-            putToGrid(tempCell, selectedType, selectedType == WALL ? 0 : clock());
+            putToGrid(tempCell, selectedType, selectedType == WALL ? 0 : GetTime());
         }
         lastInsertedCell = newCell;
     }
@@ -620,7 +616,7 @@ public:
                                 }
                 
                                 // only add the new cell if it's added to the grid successfully
-                                if (putToGrid(newPos, CHECKED, clock()))
+                                if (putToGrid(newPos, CHECKED, GetTime()))
                                 {
                                     addEdgeFrom(newPos, currentPos);
                                 }
@@ -633,7 +629,7 @@ public:
                 {
                     if (currentPos != sourcePos)
                     {
-                        putToGrid(currentPos, PATH, clock());
+                        putToGrid(currentPos, PATH, GetTime());
                         currentPos = from.get(currentPos);
                     }
                 }
