@@ -9,11 +9,11 @@
 #include "../data_structures/hashtable.hpp"
 #include "../data_structures/heap.hpp"
 
-#define MIN_CELL_DIMENSION 20.0f
-#define ITERATIONS_PER_UPDATE 20
+#define MIN_CELL_DIMENSION 10.0f
+#define ITERATIONS_PER_UPDATE 100
 #define SIZE_ANIMATION_TIME 0.2f
 #define LINEAR_ANIMATION_TIME 0.5f
-#define CELLS_NUMBERS 400.0f
+#define CELLS_NUMBERS 800.0f
 
 
 #define SOURCE_COLOR GetColor((int)0xFF6F00FF)
@@ -347,7 +347,8 @@ public:
         grid.startingPoint.x = startingPos.x;
         grid.startingPoint.y = startingPos.y;
 
-        grid.cellDimension = MIN_CELL_DIMENSION;
+        const float factor = 2;
+        grid.cellDimension = MIN_CELL_DIMENSION * factor;
 
         grid.dimensions = dimensions;
 
@@ -374,8 +375,8 @@ public:
         putToGrid(targetPos, TARGET, 0);
 
         // move everything left and up
-        xDiff = -MIN_CELL_DIMENSION * diffCellsX;
-        yDiff = -MIN_CELL_DIMENSION * diffCellsY;
+        xDiff = -MIN_CELL_DIMENSION * diffCellsX * factor;
+        yDiff = -MIN_CELL_DIMENSION * diffCellsY * factor;
 
     }
 
@@ -642,8 +643,6 @@ public:
 
 
 
-
-
 class Dijkstra : public Searcher
 {
 public:
@@ -654,9 +653,6 @@ public:
     {
     }
 };
-
-
-
 
 
 
