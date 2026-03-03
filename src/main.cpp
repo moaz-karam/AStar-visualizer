@@ -166,6 +166,7 @@ void initButtons()
 
 // main loop variables
 static Vector2 mouse;
+static bool isLeftClicked;
 static bool isLeftPressed;
 static Vector2 diff;
 static Rectangle rect;
@@ -183,8 +184,9 @@ void mainLoop(void)
 
     // managing buttons
     mouse = GetMousePosition();
+    isLeftClicked = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
     isLeftPressed = IsMouseButtonDown(MOUSE_LEFT_BUTTON);
-    updateButtons(mouse, isLeftPressed);
+    updateButtons(mouse, isLeftClicked);
 
     // add particles if mouse is pressed
     searcher->press(GetMousePosition(), isLeftPressed);
