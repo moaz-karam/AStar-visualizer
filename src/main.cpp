@@ -13,7 +13,7 @@
 #define FRAMES 60.0f
 #define SCREEN_PARTS 10.0f
 #define CONTROL_BUTTONS_NUMBER 7
-#define ALGORITHM_BUTTONS_NUMBER 3
+#define ALGORITHM_BUTTONS_NUMBER 4
 #define FONT_SIZE_RATIO FONT_SIZE / STANDARD_WIDTH
 #define BUTTON_WIDTH_RATIO 230.0f / STANDARD_WIDTH
 #define BUTTON_HEIGHT_RATIO 60.0f / STANDARD_HEIGHT
@@ -31,6 +31,9 @@
 #define ALGORITHMS 0
 #define DIJKSTRA 1
 #define ASTAR 2
+#define GREEDY_BFS 3
+
+#define LINE_COLOR ColorAlpha(BLACK, 0.2)
 
 float screenWidth = STANDARD_WIDTH;
 float screenHeight = STANDARD_HEIGHT;
@@ -45,8 +48,8 @@ static const char* controlButtonsText[] = {"CONTROLS: ", "START", "CLEAR", "SOUR
 static const Color controlButtonsColor[] = {WHITE, GREEN, LIGHTGRAY, SOURCE_COLOR, TARGET_COLOR, WALL_COLOR, RED};
 
 static Button algorithmButtons[ALGORITHM_BUTTONS_NUMBER];
-static const char* algorithmButtonsText[] = {"ALGORITHMS: ", "DIJKSTRA", "ASTAR"};
-static const Color algorithmButtonsColor[] = {WHITE, PURPLE, YELLOW};
+static const char* algorithmButtonsText[] = {"ALGORITHMS: ", "DIJKSTRA", "ASTAR", "BFS"};
+static const Color algorithmButtonsColor[] = {WHITE, PURPLE, YELLOW, MAROON};
 
 static int currentControl;
 static int currentAlgorithm;
@@ -65,6 +68,12 @@ void selectSearcherType(int type)
     {
         Searcher* oldSearcher = searcher;
         searcher = new AStar(oldSearcher);
+        delete oldSearcher;
+    }
+    else if (searcherType == GREEDY_BFS)
+    {
+        Searcher* oldSearcher = searcher;
+        searcher = new BFS(oldSearcher);
         delete oldSearcher;
     }
 }
@@ -115,6 +124,11 @@ void updateButtons(Vector2 mouse, bool isPressed)
     {
         selectSearcherType(ASTAR);
         currentAlgorithm = ASTAR;
+    }
+    if (algorithmButtons[GREEDY_BFS].updateState(mouse, isPressed, currentAlgorithm == GREEDY_BFS))
+    {
+        selectSearcherType(GREEDY_BFS);
+        currentAlgorithm = GREEDY_BFS;
     }
 }
 
@@ -172,7 +186,6 @@ static Vector2 diff;
 static Rectangle rect;
 static Vector2 sPoint;
 static Vector2 ePoint;
-static const Color lineColor = ColorAlpha(BLACK, 0.2);
 
 void mainLoop(void)
 {
@@ -215,13 +228,13 @@ void mainLoop(void)
     for (int col = 1; searcher->isColumn(col); col += 1)
     {
         searcher->getColumn(col, &sPoint, &ePoint);
-        DrawLineV(sPoint, ePoint, lineColor);
+        DrawLineV(sPoint, ePoint, LINE_COLOR);
     }
 
     for (int row = 1; searcher->isRow(row); row += 1)
     {
         searcher->getRow(row, &sPoint, &ePoint);
-        DrawLineV(sPoint, ePoint, lineColor);
+        DrawLineV(sPoint, ePoint, LINE_COLOR);
     }
 
     EndDrawing();

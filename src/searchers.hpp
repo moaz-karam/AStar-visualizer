@@ -659,17 +659,23 @@ public:
 class AStar : public Searcher
 {
 
+protected:
+
+    float heuristic(Vector2I vertex, Vector2I fromVertex)
+    {
+        float dx = vertex.x - targetPos.x;
+        float dy = vertex.y - targetPos.y;
+        return sqrt(pow(dx, 2) + pow(dy, 2));
+    }
+
 private:
     void addEdgeFrom(Vector2I vertex, Vector2I fromVertex) override
     {
         distTo.insert(vertex, distTo.get(fromVertex) + 1);
         from.insert(vertex, fromVertex);
 
-        float dx = vertex.x - targetPos.x;
-        float dy = vertex.y - targetPos.y;
-        float d = sqrt(pow(dx, 2) + pow(dy, 2));
 
-        heap.add(vertex, distTo.get(vertex) * 0.75 + d);
+        heap.add(vertex, distTo.get(vertex) + heuristic(vertex, fromVertex));
     }
 public:
     AStar(Vector2 startingPos, Vector2 dimensions):Searcher(startingPos, dimensions)
@@ -678,6 +684,26 @@ public:
     AStar(Searcher* otherSearcher):Searcher(otherSearcher)
     {
     }
+};
+
+class BFS : public AStar
+{
+
+private:
+    void addEdgeFrom(Vector2I vertex, Vector2I fromVertex) override
+    {
+        distTo.insert(vertex, distTo.get(fromVertex) + 1);
+        from.insert(vertex, fromVertex);
+        heap.add(vertex, heuristic(vertex, fromVertex));
+    }
+public:
+    BFS(Vector2 startingPoint, Vector2 dimension):AStar(startingPoint, dimension)
+    {
+    }
+    BFS(Searcher* otherSearcher):AStar(otherSearcher)
+    {
+    }
+
 };
 
 #endif
