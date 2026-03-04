@@ -113,7 +113,7 @@ protected:
     
     // contains the cell's key as a key, 
     // and the distance to the source as the value
-    Hashtable<Vector2I, int> distTo;
+    Hashtable<Vector2I, float> distTo;
 
     // contains the cell's key as a key,
     // and the key of the cell before it
@@ -147,7 +147,11 @@ protected:
 
     virtual void addEdgeFrom(Vector2I vertex, Vector2I fromVertex)
     {
-        distTo.insert(vertex, distTo.get(fromVertex) + 1);
+        float dx = vertex.x - fromVertex.x;
+        float dy = vertex.y - fromVertex.y;
+        float distance = abs(dx) + abs(dy);
+
+        distTo.insert(vertex, distTo.get(fromVertex) + distance);
         from.insert(vertex, fromVertex);
         heap.add(vertex, distTo.get(vertex));
     }
@@ -243,6 +247,16 @@ protected:
             }
         }
         return pos;
+    }
+
+    bool isGoodCorner(Vector2I pos, int x, int y)
+    {
+        Vector2I firstWall = Vector2I{.x = x + pos.x, .y = pos.y};
+        Vector2I secondWall = Vector2I{.x = pos.x, .y = y + pos.y};
+
+        if (!grid.table.containsKey(firstWall) || !grid.table.containsKey(secondWall)) return true;
+
+        return grid.table.get(firstWall).ct != WALL || grid.table.get(secondWall).ct != WALL;
     }
 
     virtual void handleAnimation(Vector2I pos, Rectangle* rect, Cell* cell)
@@ -604,23 +618,22 @@ public:
                     {
                         for (int x = -1; x <= 1; x += 1)
                         {
-                
-                            // diagonal is not allowed
-                            if (abs(x) != abs(y))
+                            if (abs(x) == abs(y))
                             {
-                                Vector2I newPos = (Vector2I){currentPos.x + x, currentPos.y + y};
+                                if (!isGoodCorner(currentPos, x, y)) continue;
+                            }
+                            Vector2I newPos = (Vector2I){currentPos.x + x, currentPos.y + y};
+        
+                            if (newPos == targetPos)
+                            {
+                                pathFound = true;
+                                from.insert(targetPos, currentPos);
+                            }
             
-                                if (newPos == targetPos)
-                                {
-                                    pathFound = true;
-                                    from.insert(targetPos, currentPos);
-                                }
-                
-                                // only add the new cell if it's added to the grid successfully
-                                if (putToGrid(newPos, CHECKED, GetTime()))
-                                {
-                                    addEdgeFrom(newPos, currentPos);
-                                }
+                            // only add the new cell if it's added to the grid successfully
+                            if (putToGrid(newPos, CHECKED, GetTime()))
+                            {
+                                addEdgeFrom(newPos, currentPos);
                             }
     
                         }
@@ -661,7 +674,7 @@ class AStar : public Searcher
 
 protected:
 
-    float heuristic(Vector2I vertex, Vector2I fromVertex)
+    float heuristic(Vector2I vertex)
     {
         float dx = vertex.x - targetPos.x;
         float dy = vertex.y - targetPos.y;
@@ -671,11 +684,13 @@ protected:
 private:
     void addEdgeFrom(Vector2I vertex, Vector2I fromVertex) override
     {
-        distTo.insert(vertex, distTo.get(fromVertex) + 1);
+        float dx = vertex.x - fromVertex.x;
+        float dy = vertex.y - fromVertex.y;
+        float distance = abs(dx) + abs(dy);
+        
+        distTo.insert(vertex, distTo.get(fromVertex) + distance);
         from.insert(vertex, fromVertex);
-
-
-        heap.add(vertex, distTo.get(vertex) + heuristic(vertex, fromVertex));
+        heap.add(vertex, distTo.get(vertex) + heuristic(vertex));
     }
 public:
     AStar(Vector2 startingPos, Vector2 dimensions):Searcher(startingPos, dimensions)
@@ -692,9 +707,8 @@ class BFS : public AStar
 private:
     void addEdgeFrom(Vector2I vertex, Vector2I fromVertex) override
     {
-        distTo.insert(vertex, distTo.get(fromVertex) + 1);
         from.insert(vertex, fromVertex);
-        heap.add(vertex, heuristic(vertex, fromVertex));
+        heap.add(vertex, heuristic(vertex));
     }
 public:
     BFS(Vector2 startingPoint, Vector2 dimension):AStar(startingPoint, dimension)
