@@ -601,10 +601,10 @@ public:
 
     virtual void update(Hashtable<Vector2I, Cell>::HashIterator& iter)
     {
-        for (int i = 0; i < ITERATIONS_PER_UPDATE; i += 1)
+        
+        if (running)
         {
-
-            if (running)
+            for (int i = 0; i < ITERATIONS_PER_UPDATE; i += 1)
             {
                 if (!pathFound)
                 {
